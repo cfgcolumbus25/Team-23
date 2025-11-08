@@ -101,7 +101,7 @@ def send_clep_policy_reminder(to_email: Union[str, List[str]], update_link: Opti
         if not frontend_base_url:
             logger.error("FRONTEND_BASE_URL not configured and update_link not provided")
             return False
-        update_link = f"{frontend_base_url}/institute"
+        update_link = f"{frontend_base_url}/institute/update"
     
     # Normalize to_email to list format
     recipients = [to_email] if isinstance(to_email, str) else to_email
@@ -172,6 +172,7 @@ This is an automated message from CLEP Bridge.
             "subject": subject,
             "html": html_body,
             "text": text_body,
+            "click_tracking": False,
         }
         
         response = resend.Emails.send(params)
