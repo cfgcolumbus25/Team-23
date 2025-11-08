@@ -114,6 +114,8 @@ def send_clep_policy_reminder(to_email: Union[str, List[str]], update_link: Opti
             return False
         update_link = f"{frontend_base_url}/institute/update"
     
+    logger.info(f"send_clep_policy_reminder: update_link='{update_link}'")
+    
     # Normalize to_email to list format
     recipients = [to_email] if isinstance(to_email, str) else to_email
     

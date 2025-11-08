@@ -45,12 +45,12 @@ export default function ManagePage() {
           <button
             onClick={handleLogout}
             disabled={loading}
-            className="px-4 py-2 bg-[#66b10e] hover:bg-[#5a9e0d] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-[#66b10e] hover:bg-[#5a9e0d] text-gray-950 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Logging out..." : "Logout"}
           </button>
         </div>
-        <InstituteForm instituteId="12345" />
+        <InstituteForm />
       </div>
     </main>
   );

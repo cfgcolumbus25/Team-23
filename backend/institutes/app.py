@@ -8,7 +8,7 @@ from flask_cors import CORS
 from supabase_client import supabase
 from datetime import datetime, timedelta
 from flasgger import Swagger, swag_from
-from utils.email import send_email
+from utils.email import send_email, send_clep_policy_reminder
 import os
 import secrets
 
@@ -426,6 +426,50 @@ def get_current_user_info():
 # INSTITUTION ACCEPTANCES CRUD ENDPOINTS (Authenticated)
 # ============================================================================
 
+@app.route('/exams', methods=['GET'])
+def get_all_exams():
+    """Get all available CLEP exams
+    ---
+    tags:
+      - Exams
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: List of all CLEP exams
+        schema:
+          type: object
+          properties:
+            exams:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+      401:
+        description: Not authenticated
+      500:
+        description: Server error
+    """
+    try:
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Not authenticated"}), 401
+        
+        # Fetch all exams
+        result = supabase.table('exams').select('id, name').order('name').execute()
+        
+        return jsonify({
+            "exams": result.data
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/institution/acceptances', methods=['GET'])
 def get_my_acceptances():
     """Get current institution's CLEP acceptances
@@ -626,6 +670,10 @@ def update_acceptance(acceptance_id):
         schema:
           type: object
           properties:
+            exam_id:
+              type: integer
+              example: 5
+              description: ID of the CLEP exam (1-38)
             cut_score:
               type: integer
               example: 55
@@ -678,12 +726,44 @@ def update_acceptance(acceptance_id):
             return jsonify({"error": "Acceptance not found"}), 404
         
         updates = {}
+        if 'exam_id' in data:
+            exam_id = data['exam_id']
+            # Validate exam_id
+            try:
+                exam_id = int(exam_id)
+                if not (1 <= exam_id <= 38):
+                    return jsonify({"error": "exam_id must be between 1 and 38"}), 400
+                updates['exam_id'] = exam_id
+            except (ValueError, TypeError):
+                return jsonify({"error": "exam_id must be an integer"}), 400
+        
         if 'cut_score' in data:
-            updates['cut_score'] = data['cut_score']
+            cut_score = data['cut_score']
+            # Validate cut_score
+            try:
+                cut_score = int(cut_score)
+                if not (20 <= cut_score <= 80):
+                    return jsonify({"error": "cut_score must be between 20 and 80"}), 400
+                updates['cut_score'] = cut_score
+            except (ValueError, TypeError):
+                return jsonify({"error": "cut_score must be an integer"}), 400
+        
         if 'credits' in data:
-            updates['credits'] = data['credits']
+            credits = data['credits']
+            # Validate credits
+            try:
+                credits = int(credits)
+                if credits < 0:
+                    return jsonify({"error": "credits must be a positive number"}), 400
+                updates['credits'] = credits
+            except (ValueError, TypeError):
+                return jsonify({"error": "credits must be an integer"}), 400
+        
         if 'related_course' in data:
             updates['related_course'] = data['related_course']
+        
+        if not updates:
+            return jsonify({"error": "No fields to update"}), 400
         
         result = supabase.table('acceptances').update(updates).eq(
             'id', acceptance_id
@@ -1047,13 +1127,11 @@ def send_bulk_emails():
         description: Not authorized (platform admin required)
     """
     try:
-        from utils.email_templates import create_reminder_email
-        
         data = request.get_json()
         institution_ids = data.get('institution_ids', [])
-        portal_url = data.get('portal_url', os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000'))
+        update_link = data.get('update_link', os.getenv('FRONTEND_BASE_URL'))
         
-        print(f"[DEBUG] portal_url value: '{portal_url}'")
+        print(f"[DEBUG] update_link value: '{update_link}'")
         print(f"[DEBUG] FRONTEND_BASE_URL env: '{os.getenv('FRONTEND_BASE_URL')}'")
         
         if not institution_ids:
@@ -1082,27 +1160,17 @@ def send_bulk_emails():
                 ).limit(1).execute()
                 
                 recipient_email = contact.data[0]['email'] if contact.data else None
-                contact_name = f"{contact.data[0]['first_name']} {contact.data[0]['last_name']}" if contact.data else None
                 
                 if not recipient_email:
                     details.append({"institution_id": inst_id, "status": "failed", "error": "No contact email found"})
                     failed_count += 1
                     continue
                 
-                # Generate email content
-                subject, text_body, html_body = create_reminder_email(
-                    institution['name'],
-                    portal_url,
-                    contact_name
-                )
-                
-                # Send email
-                print(f"[DEBUG] About to send email to {recipient_email} with subject: {subject}")
-                success = send_email(
+                # Send CLEP policy reminder email
+                print(f"[DEBUG] About to send CLEP policy reminder to {recipient_email}")
+                success = send_clep_policy_reminder(
                     to_email=recipient_email,
-                    subject=subject,
-                    body=text_body,
-                    html_body=html_body
+                    update_link=update_link
                 )
                 print(f"[DEBUG] Email send result: {success}")
                 
@@ -1111,8 +1179,8 @@ def send_bulk_emails():
                     supabase.table('sent_emails').insert({
                         'institution_id': inst_id,
                         'sent_to': recipient_email,
-                        'subject': subject,
-                        'body': text_body,
+                        'subject': 'Update Your CLEP Transfer Policy',
+                        'body': f'CLEP policy reminder sent to {recipient_email}',
                         'sent_by': user.id
                     }).execute()
                     
