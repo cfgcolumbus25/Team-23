@@ -1,6 +1,6 @@
 {
     "institutions": {
-        "institution_uuid_1": {
+        "institution_uuid_12345": {
             "institution_info":{
                 "max_credits": 30,
                 "Can Use For Failed Courses": 1,
@@ -10,6 +10,7 @@
             "clep_acceptance": [
                 {   "id": 1,
                     "exam_id_1": {
+                        "exam_name": "Biology", 
                         "cut_score": 50,
                         "credits_awarded": 3,
                         "course_equivalents": "BIO 101"
@@ -17,6 +18,7 @@
                 },
                 {   "id": 2,
                     "exam_id_2": {
+                        "exam_name": "Biology", 
                         "cut_score": 60,
                         "credits_awarded": 3,
                         "course_equivalents": "BIO 102"

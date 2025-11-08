@@ -4,7 +4,12 @@ import { InstituteForm } from './InstituteForm'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-export default function InstitutePage() {
+interface PageProps {
+  params: { id: string }
+  searchParams: { [key: string]: string | string[] | undefined }
+}
+
+export default function InstitutePage({ params, searchParams }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
@@ -34,6 +39,7 @@ export default function InstitutePage() {
     }
   }
 
+  const instituteId = params?.id || '1' // Default to '1' for demo
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md px-4">
