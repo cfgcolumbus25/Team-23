@@ -8,6 +8,7 @@ from flask_cors import CORS
 from supabase_client import supabase
 from datetime import datetime, timedelta
 from flasgger import Swagger, swag_from
+from utils.email import send_email
 import os
 import secrets
 
@@ -736,6 +737,74 @@ def health_check():
               example: institutions
     """
     return jsonify({"status": "healthy", "service": "institutions"}), 200
+
+
+# ============================================================================
+# EMAIL TEST ENDPOINT
+# ============================================================================
+
+@app.route('/email/test', methods=['POST'])
+def test_email():
+    """
+    Test email sending functionality
+    ---
+    tags:
+      - Health
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - to
+          properties:
+            to:
+              type: string
+              example: test@example.com
+              description: Recipient email address
+    responses:
+      200:
+        description: Email sent successfully
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            message:
+              type: string
+      400:
+        description: Email address required
+      500:
+        description: Failed to send email
+    """
+    try:
+        data = request.get_json()
+        to_email = data.get('to')
+        
+        if not to_email:
+            return jsonify({"error": "Email address required"}), 400
+        
+        # Send test email
+        success = send_email(
+            to_email=to_email,
+            subject="Test Email from CLEP Bridge",
+            body="This is a test email to verify the email service is working correctly."
+        )
+        
+        if success:
+            return jsonify({
+                "success": True,
+                "message": f"Test email sent to {to_email}"
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Failed to send test email. Check logs for details."
+            }), 500
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
