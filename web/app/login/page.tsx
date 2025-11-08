@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import InputField from "@/components/InputField";
+import InputField from "@/components/onboarding/InputField";
 
 // this is the login page for the application, it contains the login form and the logic for the login process
 export default function LoginPage() {

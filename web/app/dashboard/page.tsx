@@ -1,39 +1,62 @@
+import { DashboardHeader } from "@/components/dashboard/header";
+import { FiltersPanel } from "@/components/dashboard/filters-panel";
+import { InstitutionList } from "@/components/dashboard/institution-list";
+import { KeyStatsCard } from "@/components/dashboard/key-stats-card";
+import { MapPlaceholder } from "@/components/dashboard/map-placeholder";
+import { ProfileSummaryCard } from "@/components/dashboard/profile-summary-card";
+
+const mockLearner = {
+  location: "Phoenix, AZ",
+  exams: [
+    { code: "BIO-101", label: "Biology", score: 62 },
+    { code: "HIS-201", label: "US History I", score: 58 },
+  ],
+};
+
+const mockMajors = ["Biology", "Education", "Business", "General Studies"];
+const mockInstitutions = [
+  {
+    name: "Mesa State University",
+    location: "Mesa, AZ",
+    zip: "85201",
+    credits: 12,
+    lastUpdated: "Mar 2024",
+  },
+  {
+    name: "Sonoran Polytechnic",
+    location: "Tempe, AZ",
+    zip: "85281",
+    credits: 9,
+    lastUpdated: "Jan 2024",
+  },
+  {
+    name: "Cactus Valley College",
+    location: "Chandler, AZ",
+    zip: "85224",
+    credits: 6,
+    lastUpdated: "Aug 2023",
+  },
+];
+
 export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-slate-100 p-6 text-slate-900">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <header className="rounded-xl border border-slate-200 bg-white p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-            Modern States
-          </p>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-sm text-slate-600">
-            High-level layout structure.
-          </p>
-        </header>
+      <div className="flex w-full flex-col gap-6">
+        <DashboardHeader
+          badge="Modern States - CLEP Acceptance Tools"
+          title="Dashboard"
+          subtitle="High-level layout structure."
+        />
 
         <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            Profile summary - Profile will break out in separate page
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4">
-            Key stats - number of matching institutions, average credits awarded
-          </div>
+          <ProfileSummaryCard description="Profile summary - Profile will break out in separate page" />
+          <KeyStatsCard description="Key stats - number of matching institutions, average credits awarded" />
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[280px,1fr]">
-          <aside className="rounded-xl border border-slate-200 bg-white p-5">
-            Filters panel placeholder
-          </aside>
-
-          <div className="space-y-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-5">
-              Map visualization placeholder
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-5">
-              Institution list placeholder
-            </div>
-          </div>
+        <section className="grid gap-4 lg:grid-cols-3 lg:items-start">
+          <FiltersPanel learner={mockLearner} majors={mockMajors} />
+          <MapPlaceholder />
+          <InstitutionList institutions={mockInstitutions} />
         </section>
       </div>
     </main>

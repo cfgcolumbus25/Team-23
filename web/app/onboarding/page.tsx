@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import InputField from "@/components/InputField";
-import MultiSelect, { type MultiSelectOption } from "@/components/MultiSelect";
-import ExamScoreFields from "@/components/ExamScoreFields";
-import Toast from "@/components/Toast";
+import InputField from "@/components/onboarding/InputField";
+import MultiSelect, { type MultiSelectOption } from "@/components/onboarding/MultiSelect";
+import ExamScoreFields from "@/components/onboarding/ExamScoreFields";
+import Toast from "@/components/onboarding/Toast";
 
 // we set this const to the list of all possible CLEP exams which has been 
 // harcoded as its static. pulled from the collegeboard clep website. 
