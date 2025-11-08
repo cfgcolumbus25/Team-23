@@ -4,48 +4,49 @@ import { InstitutionList } from "@/components/dashboard/institution-list";
 import { KeyStatsCard } from "@/components/dashboard/key-stats-card";
 import { MapSection } from "@/components/dashboard/map-section";
 import { ProfileSummaryCard } from "@/components/dashboard/profile-summary-card";
+import { CollegeInfoCard } from "@/components/dashboard/college-info-card";
 
 const mockLearner = {
   name: "Ava Johnson",
-  location: "Phoenix, AZ",
+  location: "Columbus, OH",
   exams: [
     { code: "BIO-101", label: "Biology", score: 62 },
     { code: "HIS-201", label: "US History I", score: 58 },
   ],
   coordinates: {
-    lat: 33.4484,
-    lng: -112.074,
+    lat: 39.9612,
+    lng: -82.9988,
   },
 };
 
 const mockMajors = ["Biology", "Education", "Business", "General Studies"];
 const mockInstitutions = [
   {
-    name: "Mesa State University",
-    location: "Mesa, AZ",
-    zip: "85201",
+    name: "Ohio State University",
+    location: "Columbus, OH",
+    zip: "43210",
     credits: 12,
     lastUpdated: "Mar 2024",
-    lat: 33.4152,
-    lng: -111.8315,
+    lat: 40.0068,
+    lng: -83.0304,
   },
   {
-    name: "Sonoran Polytechnic",
-    location: "Tempe, AZ",
-    zip: "85281",
+    name: "Ohio University",
+    location: "Athens, OH",
+    zip: "45701",
     credits: 9,
     lastUpdated: "Jan 2024",
-    lat: 33.4255,
-    lng: -111.94,
+    lat: 39.3268,
+    lng: -82.1013,
   },
   {
-    name: "Cactus Valley College",
-    location: "Chandler, AZ",
-    zip: "85224",
+    name: "University of Cincinnati",
+    location: "Cincinnati, OH",
+    zip: "45221",
     credits: 6,
     lastUpdated: "Aug 2023",
-    lat: 33.3062,
-    lng: -111.8413,
+    lat: 39.1329,
+    lng: -84.5150,
   },
 ];
 const mockStats = [
@@ -92,6 +93,12 @@ export default function DashboardPage() {
           <div className="lg:col-span-3">
             <InstitutionList institutions={mockInstitutions} />
           </div>
+          {/* AI-generated information about the top choice */}
+          {mockInstitutions.length > 0 && (
+            <div className="lg:col-span-3">
+              <CollegeInfoCard institution={mockInstitutions[0]} />
+            </div>
+          )}
         </section>
       </div>
     </main>
