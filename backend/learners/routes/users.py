@@ -1,11 +1,16 @@
 from flask import Blueprint, request, jsonify
 from services.supabase_client import supabase
+from models import User
 
 users_bp = Blueprint('users', __name__, url_prefix='/learners/login')
 
 @users_bp.route('', methods=['POST'])
 def create_user():
     data = request.get_json()
+    try:
+        user = User(**data)
+    except TypeError as e:
+        return jsonify({"error": f"Invalid data: {e}"}), 400
     if not data:
         return jsonify({"error": "missing json"}), 400
 
