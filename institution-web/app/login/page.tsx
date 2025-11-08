@@ -54,8 +54,13 @@ export default function LoginPage() {
         localStorage.setItem('institute_refresh_token', data.session.refresh_token)
       }
 
-      // Redirect to manage page
-      router.push('/manage')
+      // Check if user is platform admin and redirect accordingly
+      const userRole = data.user?.role
+      if (userRole === 'platform_admin') {
+        router.push('/admin/emails')
+      } else {
+        router.push('/manage')
+      }
     } catch (err) {
       setError('Network error. Please try again.')
       setLoading(false)
