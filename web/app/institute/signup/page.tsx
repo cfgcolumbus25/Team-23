@@ -9,6 +9,11 @@ export default function SignupPage() {
     email: '',
     password: '',
     confirmPassword: '',
+    institution_id: '',
+    first_name: '',
+    last_name: '',
+    title: '',
+    phone: '',
   })
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -22,7 +27,7 @@ export default function SignupPage() {
     if (error) setError(null)
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
 
@@ -34,14 +39,51 @@ export default function SignupPage() {
 
     setLoading(true)
 
-    // Log form data
-    console.log('Signup attempt:', { email: formData.email })
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
-    // Simulate signup delay
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${apiUrl}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          institution_id: formData.institution_id,
+          first_name: formData.first_name || undefined,
+          last_name: formData.last_name || undefined,
+          title: formData.title || undefined,
+          phone: formData.phone || undefined,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Signup failed')
+        setLoading(false)
+        return
+      }
+
+      // Store tokens if session is available
+      if (data.session) {
+        localStorage.setItem('institute_access_token', data.session.access_token)
+        localStorage.setItem('institute_refresh_token', data.session.refresh_token)
+        router.push('/institute')
+      } else {
+        // Email confirmation required
+        setError(data.message || 'Please check your email to confirm your account.')
+        setLoading(false)
+        // Optionally redirect to login after a delay
+        setTimeout(() => {
+          router.push('/institute/login')
+        }, 3000)
+      }
+    } catch (err) {
+      setError('Network error. Please try again.')
       setLoading(false)
-      router.push('/institute')
-    }, 500)
+    }
   }
 
   return (
@@ -52,6 +94,22 @@ export default function SignupPage() {
           onSubmit={handleSubmit}
           className="flex flex-col gap-4 p-6 bg-white rounded-xl shadow-md w-full"
         >
+          <div>
+            <label className="block text-sm font-semibold mb-1 text-gray-900">
+              Institution ID
+            </label>
+            <input
+              type="text"
+              name="institution_id"
+              value={formData.institution_id}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-700"
+              placeholder="Enter institution UUID"
+              required
+              disabled={loading}
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-semibold mb-1 text-gray-900">
               Email
@@ -93,6 +151,63 @@ export default function SignupPage() {
               onChange={handleChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-700"
               required
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-1 text-gray-900">
+              First Name (optional)
+            </label>
+            <input
+              type="text"
+              name="first_name"
+              value={formData.first_name}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-700"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-1 text-gray-900">
+              Last Name (optional)
+            </label>
+            <input
+              type="text"
+              name="last_name"
+              value={formData.last_name}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-700"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-1 text-gray-900">
+              Title (optional)
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-700"
+              placeholder="e.g., Registrar"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-1 text-gray-900">
+              Phone (optional)
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-700"
               disabled={loading}
             />
           </div>

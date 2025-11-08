@@ -21,19 +21,45 @@ export default function LoginPage() {
     if (error) setError(null)
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
-    // Log form data
-    console.log('Login attempt:', { email: formData.email })
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
-    // Simulate login delay
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      const response = await fetch(`${apiUrl}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed')
+        setLoading(false)
+        return
+      }
+
+      // Store tokens in localStorage
+      if (data.session) {
+        localStorage.setItem('institute_access_token', data.session.access_token)
+        localStorage.setItem('institute_refresh_token', data.session.refresh_token)
+      }
+
+      // Redirect to institute page
       router.push('/institute')
-    }, 500)
+    } catch (err) {
+      setError('Network error. Please try again.')
+      setLoading(false)
+    }
   }
 
   return (
