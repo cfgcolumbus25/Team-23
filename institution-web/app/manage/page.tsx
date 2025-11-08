@@ -36,7 +36,7 @@ export default function ManagePage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md px-4">
+      <div className="w-full max-w-2xl px-6">
         {/* Align header and logout button */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">
