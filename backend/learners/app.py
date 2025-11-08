@@ -1,12 +1,14 @@
 from flask import Flask
 from flask_cors import CORS
 from routes.users import users_bp
+from routes.universities import universities_bp
 
 def create_app():
     app = Flask(__name__)
     CORS(app, resources={r"/*": {"origins": "*"}})
 
     app.register_blueprint(users_bp, url_prefix="/learners")
+    app.register_blueprint(universities_bp, url_prefix="/universities")
 
     return app
 
