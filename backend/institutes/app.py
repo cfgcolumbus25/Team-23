@@ -1051,7 +1051,10 @@ def send_bulk_emails():
         
         data = request.get_json()
         institution_ids = data.get('institution_ids', [])
-        portal_url = data.get('portal_url', os.getenv('INSTITUTIONAL_WEB_URL', 'http://localhost:3000'))
+        portal_url = data.get('portal_url', os.getenv('FRONTEND_BASE_URL', 'http://localhost:3000'))
+        
+        print(f"[DEBUG] portal_url value: '{portal_url}'")
+        print(f"[DEBUG] FRONTEND_BASE_URL env: '{os.getenv('FRONTEND_BASE_URL')}'")
         
         if not institution_ids:
             return jsonify({"error": "institution_ids required"}), 400
