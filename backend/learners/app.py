@@ -25,4 +25,4 @@ if __name__ == "__main__":
     app = create_app()
     # Explicitly bind to 0.0.0.0 to ensure accessibility on macOS
     # Using port 5001 to avoid conflict with macOS AirPlay Receiver on port 5000
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=True)

@@ -1,16 +1,18 @@
 "use client";
 
-const API_BASE = "http://localhost:5001";
+const API_BASE = "http://localhost:5002";
 
 import React from "react";
 import InputField from "@/components/onboarding/InputField";
-import MultiSelect, { type MultiSelectOption } from "@/components/onboarding/MultiSelect";
+import MultiSelect, {
+  type MultiSelectOption,
+} from "@/components/onboarding/MultiSelect";
 import ExamScoreFields from "@/components/onboarding/ExamScoreFields";
 import Toast from "@/components/onboarding/Toast";
 import { useRouter } from "next/navigation";
 
-// we set this const to the list of all possible CLEP exams which has been 
-// harcoded as its static. pulled from the collegeboard clep website. 
+// we set this const to the list of all possible CLEP exams which has been
+// harcoded as its static. pulled from the collegeboard clep website.
 const CLEP_EXAMS: MultiSelectOption[] = [
   { label: "American Government", value: "American Government" },
   {
@@ -21,16 +23,28 @@ const CLEP_EXAMS: MultiSelectOption[] = [
     label: "History of the United States II: 1865 to the Present",
     value: "History of the United States II: 1865 to the Present",
   },
-  { label: "Human Growth and Development", value: "Human Growth and Development" },
+  {
+    label: "Human Growth and Development",
+    value: "Human Growth and Development",
+  },
   {
     label: "Introduction to Educational Psychology",
     value: "Introduction to Educational Psychology",
   },
   { label: "Introductory Psychology", value: "Introductory Psychology" },
   { label: "Introductory Sociology", value: "Introductory Sociology" },
-  { label: "Principles of Macroeconomics", value: "Principles of Macroeconomics" },
-  { label: "Principles of Microeconomics", value: "Principles of Microeconomics" },
-  { label: "Social Sciences and History", value: "Social Sciences and History" },
+  {
+    label: "Principles of Macroeconomics",
+    value: "Principles of Macroeconomics",
+  },
+  {
+    label: "Principles of Microeconomics",
+    value: "Principles of Microeconomics",
+  },
+  {
+    label: "Social Sciences and History",
+    value: "Social Sciences and History",
+  },
   {
     label: "Western Civilization I: Ancient Near East to 1648",
     value: "Western Civilization I: Ancient Near East to 1648",
@@ -46,7 +60,10 @@ const CLEP_EXAMS: MultiSelectOption[] = [
     value: "Analyzing and Interpreting Literature",
   },
   { label: "College Composition", value: "College Composition" },
-  { label: "College Composition Modular", value: "College Composition Modular" },
+  {
+    label: "College Composition Modular",
+    value: "College Composition Modular",
+  },
   { label: "English Literature", value: "English Literature" },
   { label: "Humanities", value: "Humanities" },
   // Science & Mathematics
@@ -64,10 +81,22 @@ const CLEP_EXAMS: MultiSelectOption[] = [
   { label: "Principles of Management", value: "Principles of Management" },
   { label: "Principles of Marketing", value: "Principles of Marketing" },
   // World Languages
-  { label: "French Language: Levels 1 and 2", value: "French Language: Levels 1 and 2" },
-  { label: "German Language: Levels 1 and 2", value: "German Language: Levels 1 and 2" },
-  { label: "Spanish Language: Levels 1 and 2", value: "Spanish Language: Levels 1 and 2" },
-  { label: "Spanish with Writing: Levels 1 and 2", value: "Spanish with Writing: Levels 1 and 2" },
+  {
+    label: "French Language: Levels 1 and 2",
+    value: "French Language: Levels 1 and 2",
+  },
+  {
+    label: "German Language: Levels 1 and 2",
+    value: "German Language: Levels 1 and 2",
+  },
+  {
+    label: "Spanish Language: Levels 1 and 2",
+    value: "Spanish Language: Levels 1 and 2",
+  },
+  {
+    label: "Spanish with Writing: Levels 1 and 2",
+    value: "Spanish with Writing: Levels 1 and 2",
+  },
 ];
 
 /*
@@ -81,12 +110,14 @@ export default function OnboardingPage() {
   const [zip, setZip] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [selectedExams, setSelectedExams] = React.useState<string[]>([]);
-  const [scoresByExam, setScoresByExam] = React.useState<Record<string, string>>({});
+  const [scoresByExam, setScoresByExam] = React.useState<
+    Record<string, string>
+  >({});
   const [showToast, setShowToast] = React.useState(false);
-  const [toastMessage, setToastMessage] = React.useState('')
+  const [toastMessage, setToastMessage] = React.useState("");
   const router = useRouter();
 
-  // manage errors for the input fields 
+  // manage errors for the input fields
   const [errors, setErrors] = React.useState<{
     name?: string;
     email?: string;
@@ -96,8 +127,8 @@ export default function OnboardingPage() {
     examScores?: Record<string, string | undefined>;
   }>({});
 
-  // this useeffect used to remove scores for any of the CLEP exams that were 
-  // not selected by any of the users 
+  // this useeffect used to remove scores for any of the CLEP exams that were
+  // not selected by any of the users
   React.useEffect(() => {
     // remove here so that the scores are not shown for any of the CLEP exams that were not selected by the user
     setScoresByExam((prev) => {
@@ -110,17 +141,17 @@ export default function OnboardingPage() {
     });
   }, [selectedExams]);
 
-  // this function validates the various input fields, returns true if all fields 
+  // this function validates the various input fields, returns true if all fields
   // are valid, false if any of fields invalid
   function validate(): boolean {
     const nextErrors: typeof errors = { examScores: {} };
-    // validate the name field 
+    // validate the name field
     if (!name.trim()) nextErrors.name = "Name is required";
     if (!email.trim()) {
       // check that email nonempty
       nextErrors.email = "Email is required";
     } else {
-      // check that email has a valid format 
+      // check that email has a valid format
       const simpleEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!simpleEmail.test(email)) {
         nextErrors.email = "Enter a valid email";
@@ -136,9 +167,11 @@ export default function OnboardingPage() {
       const val = scoresByExam[exam];
       if (val === undefined || val === "") {
         // score optional for selected exams
-      } else if (!/^\d+$/.test(val)) { // check that score is numeric
+      } else if (!/^\d+$/.test(val)) {
+        // check that score is numeric
         nextErrors.examScores![exam] = "Score must be numeric";
-      } else { // check that score is between 20 and 80
+      } else {
+        // check that score is between 20 and 80
         const num = Number(val);
         if (num < 20 || num > 80) {
           nextErrors.examScores![exam] = "Score must be between 20 and 80";
@@ -191,20 +224,20 @@ export default function OnboardingPage() {
       }
 
       console.log("User created:", json);
-      
+
       // Save user data to localStorage for personalization
       const userData = {
         name: name.trim(),
         email: email.trim(),
         zipcode: zip.trim(),
-        exams: selectedExams.map(exam => ({
+        exams: selectedExams.map((exam) => ({
           label: exam,
-          code: exam.replace(/\s+/g, '-').toUpperCase(),
+          code: exam.replace(/\s+/g, "-").toUpperCase(),
           score: scoresByExam[exam] ? parseInt(scoresByExam[exam], 10) : 0,
         })),
       };
-      localStorage.setItem('userData', JSON.stringify(userData));
-      
+      localStorage.setItem("userData", JSON.stringify(userData));
+
       setToastMessage("Profile created successfully!");
       setShowToast(true);
       router.push("/dashboard");
@@ -227,7 +260,9 @@ export default function OnboardingPage() {
       />
       <div className="w-full max-w-md rounded-xl border border-[#bebebe] bg-white p-6 shadow sm:p-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-[#1c1c1c]">Create Your Profile</h1>
+          <h1 className="text-2xl font-bold text-[#1c1c1c]">
+            Create Your Profile
+          </h1>
           <p className="mt-1 text-sm text-[#4a4a4a]">
             Tell us a bit about you and your CLEP exams.
           </p>
