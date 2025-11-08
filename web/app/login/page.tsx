@@ -23,10 +23,10 @@ export default function LoginPage() {
 
   // return the login page with the login form and the footer
   return (
-    <div className="relative flex h-screen items-center justify-center bg-slate-50">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow">
+    <div className="relative flex h-screen items-center justify-center bg-slate-100 text-slate-900">
+      <div className="w-full max-w-md rounded-xl border border-[#bebebe] bg-white p-8 shadow">
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold text-slate-900">CLEPBridge</h1>
+          <h1 className="text-3xl font-bold text-[#1c1c1c]">CLEPBridge</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <InputField
@@ -49,7 +49,7 @@ export default function LoginPage() {
           />
           <button
             type="submit"
-            className="w-full rounded-md bg-blue-600 px-4 py-2.5 text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600/20"
+            className="w-full rounded-md bg-[#6ebf10] px-4 py-2.5 font-semibold text-white shadow transition hover:bg-[#5aa50c] focus:outline-none focus:ring-2 focus:ring-[#6ebf10]/20"
           >
             Log In
           </button>
@@ -57,7 +57,7 @@ export default function LoginPage() {
         <div className="mt-4 text-center">
           <Link
             href="/onboarding"
-            className="text-sm font-medium text-blue-700 hover:underline"
+            className="text-sm font-medium text-[#6ebf10] hover:underline"
           >
             Create Account
           </Link>
