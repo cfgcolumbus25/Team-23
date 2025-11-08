@@ -1,0 +1,32 @@
+{
+  "name": "clepbridge",
+  "version": "1.0.0",
+  "description": "CLEPBridge - Connect students with CLEP-accepting institutions",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others --names \"INST-WEB,LEARN-WEB,API\" --prefix-colors \"blue,green,magenta\" \"npm run dev:institution-web\" \"npm run dev:learner-web\" \"npm run dev:backend\"",
+    "dev:institution-web": "cd institution-web && npm run dev",
+    "dev:learner-web": "cd learner-web && npm run dev",
+    "dev:backend": "cd backend/institutes && python app.py",
+    "dev:institution": "concurrently --kill-others --names \"INST-WEB,API\" --prefix-colors \"blue,magenta\" \"npm run dev:institution-web\" \"npm run dev:backend\"",
+    "dev:learner": "concurrently --kill-others --names \"LEARN-WEB,API\" --prefix-colors \"green,magenta\" \"npm run dev:learner-web\" \"npm run dev:backend\"",
+    "dev:frontends": "concurrently --kill-others --names \"INST-WEB,LEARN-WEB\" --prefix-colors \"blue,green\" \"npm run dev:institution-web\" \"npm run dev:learner-web\"",
+    "install-all": "npm run install:institution-web && npm run install:learner-web && npm run install:backend",
+    "install:institution-web": "cd institution-web && npm install",
+    "install:learner-web": "cd learner-web && npm install",
+    "install:backend": "cd backend/institutes && pip install -r requirements.txt",
+    "clean": "npm run clean:institution-web && npm run clean:learner-web",
+    "clean:institution-web": "cd institution-web && rm -rf node_modules .next",
+    "clean:learner-web": "cd learner-web && rm -rf node_modules .next",
+    "build": "npm run build:institution-web && npm run build:learner-web",
+    "build:institution-web": "cd institution-web && npm run build",
+    "build:learner-web": "cd learner-web && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
