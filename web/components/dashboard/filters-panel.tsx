@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from "react";
+
 type Learner = {
   location: string;
   exams: Array<{ code: string; label: string; score: number }>;
@@ -9,6 +13,8 @@ type FiltersPanelProps = {
 };
 
 export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
+  const [radius, setRadius] = useState(50);
+
   return (
     <aside className="rounded-xl border border-slate-200 bg-white p-5">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -24,12 +30,13 @@ export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
           <div className="flex items-center gap-2">
             <input
               type="range"
-              defaultValue={50}
+              value={radius}
+              onChange={(event) => setRadius(Number(event.target.value))}
               min={10}
               max={250}
               className="flex-1 accent-slate-900"
             />
-            <span className="w-14 text-right font-semibold">50 mi</span>
+            <span className="w-14 text-right font-semibold">{radius} mi</span>
           </div>
           <p className="text-xs text-slate-500">Based on {learner.location}</p>
         </div>

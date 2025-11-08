@@ -3,11 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import InputField from "@/components/onboarding/InputField";
+import { useRouter } from "next/navigation";
 
 // this is the login page for the application, it contains the login form and the logic for the login process
 export default function LoginPage() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const router = useRouter();
 
   // this function is called when the user submits the form, it logs the email and password to the console
   function handleSubmit(e: React.FormEvent) {
@@ -15,6 +17,8 @@ export default function LoginPage() {
     // log the email and password to the console
     // eslint-disable-next-line no-console
     console.log({ email, password });
+    // after successful login, route to dashboard
+    router.push("/dashboard");
   }
 
   // return the login page with the login form and the footer
