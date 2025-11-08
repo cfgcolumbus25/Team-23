@@ -6,6 +6,7 @@ import { MapPlaceholder } from "@/components/dashboard/map-placeholder";
 import { ProfileSummaryCard } from "@/components/dashboard/profile-summary-card";
 
 const mockLearner = {
+  name: "Ava Johnson",
   location: "Phoenix, AZ",
   exams: [
     { code: "BIO-101", label: "Biology", score: 62 },
@@ -49,7 +50,7 @@ export default function DashboardPage() {
         />
 
         <section className="grid gap-4 md:grid-cols-2">
-          <ProfileSummaryCard description="Profile summary - Profile will break out in separate page" />
+          <ProfileSummaryCard learner={mockLearner} />
           <KeyStatsCard description="Key stats - number of matching institutions, average credits awarded" />
         </section>
 
