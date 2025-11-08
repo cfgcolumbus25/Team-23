@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from services.supabase_client import supabase
 from typing import List, Dict, Any
 
-universities_bp = Blueprint("universities", __name__, url_prefix='api/universities')
+universities_bp = Blueprint("universities", __name__, url_prefix='/universities')
 
 
 @universities_bp.route("", methods=["GET"])
