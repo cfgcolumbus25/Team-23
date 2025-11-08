@@ -25,25 +25,39 @@ export function InstitutionList({ institutions }: InstitutionListProps) {
         </div>
       </div>
       {/* List of institution cards */}
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 space-y-4">
         {institutions.map((institution) => (
           <article
             key={institution.name}
-            className="rounded-2xl border border-[#e1eddc] bg-[#f9fff2] p-4 text-sm shadow-sm"
+            className="group rounded-2xl border-2 border-[#d5e3cf] bg-white p-6 shadow-md transition-all hover:border-[#6ebf10] hover:shadow-lg"
           >
-            <div className="flex items-center justify-between">
-              <p className="font-semibold text-[#1c1c1c]">{institution.name}</p>
-              <span className="text-xs text-[#4a4a4a]">{institution.lastUpdated}</span>
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-[#1c1c1c] group-hover:text-[#6ebf10] transition-colors mb-2">
+                  {institution.name}
+                </h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-sm font-medium text-[#2a2a2a]">
+                    {institution.location}
+                  </span>
+                  <span className="text-[#d5e3cf]">·</span>
+                  <span className="text-sm font-medium text-[#2a2a2a]">
+                    {institution.zip}
+                  </span>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-semibold text-[#1c1c1c]">Credits:</span>
+                    <span className="text-2xl font-bold text-[#6ebf10]">
+                      {institution.credits}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium text-[#4a4a4a]">
+                    Updated {institution.lastUpdated}
+                  </span>
+                </div>
+              </div>
             </div>
-            <p className="text-[#4a4a4a]">
-              {institution.location} · {institution.zip}
-            </p>
-            <p className="text-xs text-[#4a4a4a]">
-              Credits awarded:{" "}
-              <span className="font-semibold text-[#6ebf10]">
-                {institution.credits}
-              </span>
-            </p>
           </article>
         ))}
       </div>
