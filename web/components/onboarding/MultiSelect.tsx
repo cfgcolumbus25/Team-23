@@ -49,7 +49,7 @@ export default function MultiSelect({
           onClick={() => setOpen((v) => !v)}
           className={[
             "flex w-full items-center justify-between rounded-md border border-slate-300 bg-white px-3 py-2 text-left text-slate-900 shadow-sm",
-            "focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20",
+            "focus:border-[#6ebf10] focus:outline-none focus:ring-2 focus:ring-[#6ebf10]/20",
             error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : "",
           ].join(" ")}
         >
@@ -91,7 +91,7 @@ export default function MultiSelect({
                 >
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+                    className="h-4 w-4 rounded border-slate-300 accent-[#6ebf10]"
                     checked={checked}
                     onChange={() => toggleValue(opt.value)}
                   />
@@ -110,13 +110,13 @@ export default function MultiSelect({
             return (
               <span
                 key={val}
-                className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+                className="inline-flex items-center gap-1 rounded-full border border-[#bebebe] px-3 py-1 text-xs font-medium text-[#1c1c1c]"
               >
                 {label}
                 <button
                   type="button"
                   aria-label={`Remove ${label}`}
-                  className="text-blue-700/70 hover:text-blue-900"
+                  className="text-slate-500 hover:text-slate-700"
                   onClick={() => toggleValue(val)}
                 >
                   ×

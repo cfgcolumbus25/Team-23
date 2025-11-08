@@ -52,7 +52,7 @@ export default function InputField({
         max={max}
         className={[
           "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder-slate-400 shadow-sm",
-          "focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20",
+          "focus:border-[#6ebf10] focus:outline-none focus:ring-2 focus:ring-[#6ebf10]/20",
           error ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : "",
         ].join(" ")}
       />
