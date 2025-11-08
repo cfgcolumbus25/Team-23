@@ -4,12 +4,7 @@ import { InstituteForm } from './InstituteForm'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-interface PageProps {
-  params: { id: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-export default function InstitutePage({ params, searchParams }: PageProps) {
+export default function InstitutePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
@@ -39,22 +34,21 @@ export default function InstitutePage({ params, searchParams }: PageProps) {
     }
   }
 
-  const instituteId = params?.id || '1' // Default to '1' for demo
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md px-4">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-8">
+      <div className="w-full max-w-4xl px-4">
         {/* Align header and logout button */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">Institute Policy Settings</h1>
           <button
             onClick={handleLogout}
             disabled={loading}
-            className="px-4 py-2 bg-[#66b10e] hover:bg-[#5a9e0d] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             {loading ? 'Logging out...' : 'Logout'}
           </button>
         </div>
-        <InstituteForm instituteId="12345" />
+          <InstituteForm />
       </div>
     </main>
   )
