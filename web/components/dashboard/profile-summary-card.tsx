@@ -1,9 +1,11 @@
+// Exam data structure
 type Exam = {
   code: string;
   label: string;
   score: number;
 };
 
+// Props for profile summary card component
 type ProfileSummaryCardProps = {
   learner: {
     name?: string;
@@ -12,6 +14,7 @@ type ProfileSummaryCardProps = {
   };
 };
 
+// Component that displays learner profile information and CLEP exams
 export function ProfileSummaryCard({ learner }: ProfileSummaryCardProps) {
   return (
     <section className="rounded-3xl border border-[#d5e3cf] bg-white p-5 shadow-lg shadow-black/5">
@@ -23,6 +26,7 @@ export function ProfileSummaryCard({ learner }: ProfileSummaryCardProps) {
       </h2>
       <p className="text-sm text-[#4a4a4a]">Based in {learner.location}</p>
 
+      {/* CLEP exams section */}
       <div className="mt-5 rounded-2xl bg-[#f6fff0] p-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-[#6ebf10]">
           CLEP Exams
@@ -30,6 +34,7 @@ export function ProfileSummaryCard({ learner }: ProfileSummaryCardProps) {
         <p className="text-sm text-[#4a4a4a]">
           {learner.exams.length} exams recorded
         </p>
+        {/* List of exam badges */}
         <div className="mt-3 flex flex-wrap gap-2">
           {learner.exams.map((exam) => (
             <span

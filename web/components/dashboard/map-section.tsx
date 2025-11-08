@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 
+// Institution data for map display
 type MapInstitution = {
   name: string;
   location: string;
@@ -14,19 +15,23 @@ type MapInstitution = {
   lastUpdated?: string;
 };
 
+// Props for map section component
 type MapSectionProps = {
   institutions: MapInstitution[];
   learnerLocation?: { lat: number; lng: number };
 };
 
+// Map component that displays institutions on an interactive map
 export function MapSection({
   institutions,
   learnerLocation,
 }: MapSectionProps) {
+  // Refs for map container and instance
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<mapboxgl.Map | null>(null);
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
+  // Initialize map when component mounts or dependencies change
   useEffect(() => {
     if (!accessToken || !mapRef.current) {
       return;
@@ -35,7 +40,7 @@ export function MapSection({
     mapboxgl.accessToken = accessToken;
     const container = mapRef.current;
 
-    // Prefer centering the map on the learner's location, then fall back to matches, then US midpoint.
+    // Determine map center: prefer learner location, then first institution, then US center
     const fallbackCenter: [number, number] = [-98.5795, 39.8283];
     const center: [number, number] = learnerLocation
       ? [learnerLocation.lng, learnerLocation.lat]
@@ -51,11 +56,13 @@ export function MapSection({
       attributionControl: false,
     });
 
+    // Add navigation controls to map
     mapInstance.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
+    // Create bounds to fit all markers
     const bounds = new mapboxgl.LngLatBounds();
 
-    // Render each institution as a marker with a descriptive popup.
+    // Add markers for each institution
     institutions.forEach((institution) => {
       const lngLat: [number, number] = [institution.lng, institution.lat];
       bounds.extend(lngLat);
@@ -77,11 +84,12 @@ export function MapSection({
         .addTo(mapInstance.current!);
     });
 
+    // Fit map to show all markers if there are multiple
     if (institutions.length > 1) {
       mapInstance.current.fitBounds(bounds, { padding: 40 });
     }
 
-    // Tear down the map to avoid leaks when dependencies change.
+    // Cleanup: remove map instance when component unmounts or dependencies change
     return () => {
       mapInstance.current?.remove();
       mapInstance.current = null;
@@ -103,6 +111,7 @@ export function MapSection({
           Live explorer
         </span>
       </div>
+      {/* Show error message if Mapbox token is missing */}
       {!accessToken ? (
         <p className="mt-4 rounded-2xl border border-dashed border-[#6ebf10] bg-[#f6fff0] p-4 text-sm text-[#1c1c1c]">
           Mapbox access token missing. Set{" "}

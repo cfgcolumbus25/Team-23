@@ -1,3 +1,4 @@
+// Institution data structure
 type Institution = {
   name: string;
   location: string;
@@ -6,10 +7,12 @@ type Institution = {
   lastUpdated: string;
 };
 
+// Props for institution list component
 type InstitutionListProps = {
   institutions: Institution[];
 };
 
+// Component that displays a list of matching institutions
 export function InstitutionList({ institutions }: InstitutionListProps) {
   return (
     <section className="rounded-3xl border border-[#d5e3cf] bg-white p-6 shadow-lg shadow-black/5">
@@ -20,10 +23,8 @@ export function InstitutionList({ institutions }: InstitutionListProps) {
           </p>
           <h2 className="text-lg font-semibold text-[#1c1c1c]">Matching results</h2>
         </div>
-        <button className="rounded-full border border-[#6ebf10] px-4 py-1.5 text-xs font-semibold text-[#6ebf10]">
-          Export
-        </button>
       </div>
+      {/* List of institution cards */}
       <div className="mt-4 space-y-3">
         {institutions.map((institution) => (
           <article

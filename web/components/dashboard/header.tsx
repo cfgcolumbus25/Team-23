@@ -1,9 +1,11 @@
+// Props for dashboard header component
 type DashboardHeaderProps = {
   badge: string;
   title: string;
   subtitle: string;
 };
 
+// Header component for dashboard page
 export function DashboardHeader({ badge, title, subtitle }: DashboardHeaderProps) {
   return (
     <header className="rounded-3xl border border-[#cfd8c6] bg-white p-6 shadow-lg shadow-[#6ebf10]/15">

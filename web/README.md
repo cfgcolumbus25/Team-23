@@ -31,6 +31,14 @@ NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN="paste-your-mapbox-token"
 
 The token must have Mapbox Maps GL JS permissions since it is used client-side.
 
+Add your Gemini API key to enable AI-generated college information:
+
+```bash
+GEMINI_API_KEY="paste-your-gemini-api-key"
+```
+
+This key is used server-side only to fetch information about colleges from Google Gemini.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
