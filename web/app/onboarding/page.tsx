@@ -1,5 +1,7 @@
 "use client";
 
+const API_BASE = "http://localhost:5000";
+
 import React from "react";
 import InputField from "@/components/onboarding/InputField";
 import MultiSelect, { type MultiSelectOption } from "@/components/onboarding/MultiSelect";
@@ -150,23 +152,41 @@ export default function OnboardingPage() {
 
   // this function is called when the user submits the form, it validates the form
   // and if valid, it calls the backend API to create the profile
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
     // create the payload for the backend API
     const payload = {
       name: name.trim(),
       email: email.trim(),
-      zip,
-      exams: selectedExams,
-      scores: scoresByExam,
+      zip: parseInt(zip, 10),
+      exams: selectedExams.reduce((acc, exam) => {
+        acc[exam] = scoresByExam[exam] ? parseInt(scoresByExam[exam], 10) : 0;
+        return acc;
+      }, {} as Record<string, number>),
+      maxCredits: undefined, // optional
     };
-    // log the payload to the console
-    // eslint-disable-next-line no-console
-    console.log("Onboarding profile:", payload);
-    setShowToast(true);
-    // after successful profile creation, route to dashboard
-    router.push("/dashboard");
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/learners/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(payload), 
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        console.error("Create user failed", res.status)
+        return;
+      }
+
+      console.log("User created:", json)
+      setShowToast(true);
+      router.push("/dashboard");
+    } catch (err) {
+      console.error("Network error:", err);
+    }
   }
 
   // this function is called when the user changes the score for a CLEP exam
