@@ -1,9 +1,17 @@
-from flask import Flask, request, jsonify;
+from flask import Flask
+from config import Config
+from extensions import init_extensions
+from blueprints.users import user_bp
 
-app = Flask(__name__)
+def create_app(config_object=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_object)
 
-@app.route('/', methods=['POST'])
+    init_extensions(app)
 
-@app.route('/', methods=['GET'])
+    app.register_blueprint(user_bp, url_prefix="/learners")
 
-@app.route('/', methods=['DELETE'])
+    return app
+
+if __name__ == "__main__":
+    create_app().run(debug=True)
