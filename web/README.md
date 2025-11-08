@@ -20,6 +20,17 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Environment Variables
+
+Add your Mapbox access token so the dashboard can render the learner map:
+
+```bash
+cp .env.example .env.local # optional helper
+NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN="paste-your-mapbox-token"
+```
+
+The token must have Mapbox Maps GL JS permissions since it is used client-side.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
