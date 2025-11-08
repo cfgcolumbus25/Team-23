@@ -10,10 +10,15 @@ type Institution = {
 // Props for institution list component
 type InstitutionListProps = {
   institutions: Institution[];
+  selectedInstitutionKey?: string | null;
+  onSelect?: (institution: Institution) => void;
 };
 
 // Component that displays a list of matching institutions
-export function InstitutionList({ institutions }: InstitutionListProps) {
+export function InstitutionList({ institutions, selectedInstitutionKey, onSelect }: InstitutionListProps) {
+  const getInstitutionKey = (institution: Institution) =>
+    `${institution.name}-${institution.zip}`;
+
   return (
     <section className="rounded-3xl border border-[#d5e3cf] bg-white p-6 shadow-lg shadow-black/5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -28,8 +33,22 @@ export function InstitutionList({ institutions }: InstitutionListProps) {
       <div className="mt-4 space-y-4">
         {institutions.map((institution) => (
           <article
-            key={institution.name}
-            className="group rounded-2xl border-2 border-[#d5e3cf] bg-white p-6 shadow-md transition-all hover:border-[#6ebf10] hover:shadow-lg"
+            key={getInstitutionKey(institution)}
+            role={onSelect ? 'button' : undefined}
+            tabIndex={onSelect ? 0 : undefined}
+            onClick={() => onSelect?.(institution)}
+            onKeyDown={(event) => {
+              if (onSelect && (event.key === 'Enter' || event.key === ' ')) {
+                event.preventDefault();
+                onSelect(institution);
+              }
+            }}
+            className={[
+              "group rounded-2xl border-2 bg-white p-6 shadow-md transition-all hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ebf10]",
+              selectedInstitutionKey === getInstitutionKey(institution)
+                ? "border-[#6ebf10] shadow-lg"
+                : "border-[#d5e3cf] hover:border-[#6ebf10]"
+            ].join(' ')}
           >
             <div className="flex items-start justify-between gap-6">
               <div className="flex-1">
