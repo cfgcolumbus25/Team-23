@@ -7,3 +7,4 @@ class User:
     email: str 
     zipcode: int 
     exams: Dict[str, int] = field(default_factory = dict)
+    maxCredits: int
