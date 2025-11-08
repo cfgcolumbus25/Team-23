@@ -8,6 +8,7 @@ from flask_cors import CORS
 from supabase_client import supabase
 from datetime import datetime, timedelta
 from flasgger import Swagger, swag_from
+from utils.email import send_email, send_clep_policy_reminder
 import os
 import secrets
 
@@ -94,6 +95,25 @@ def get_institution_membership(user_id):
         return result.data
     except:
         return None
+
+
+def require_platform_admin(f):
+    """Decorator to require platform_admin role for a route"""
+    from functools import wraps
+    
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Not authenticated"}), 401
+        
+        membership = get_institution_membership(user.id)
+        if not membership or membership.get('role') != 'platform_admin':
+            return jsonify({"error": "Platform admin access required"}), 403
+        
+        return f(*args, **kwargs)
+    
+    return decorated_function
 
 
 # ============================================================================
@@ -406,6 +426,50 @@ def get_current_user_info():
 # INSTITUTION ACCEPTANCES CRUD ENDPOINTS (Authenticated)
 # ============================================================================
 
+@app.route('/exams', methods=['GET'])
+def get_all_exams():
+    """Get all available CLEP exams
+    ---
+    tags:
+      - Exams
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: List of all CLEP exams
+        schema:
+          type: object
+          properties:
+            exams:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+      401:
+        description: Not authenticated
+      500:
+        description: Server error
+    """
+    try:
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Not authenticated"}), 401
+        
+        # Fetch all exams
+        result = supabase.table('exams').select('id, name').order('name').execute()
+        
+        return jsonify({
+            "exams": result.data
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/institution/acceptances', methods=['GET'])
 def get_my_acceptances():
     """Get current institution's CLEP acceptances
@@ -503,6 +567,8 @@ def add_acceptance():
               type: boolean
             acceptance:
               type: object
+      400:
+        description: Missing required fields
       401:
         description: Not authenticated
       403:
@@ -523,13 +589,46 @@ def add_acceptance():
             return jsonify({"error": "Insufficient permissions"}), 403
         
         data = request.get_json()
+        
+        # Validate required fields
+        if not data:
+            return jsonify({"error": "Request body required"}), 400
+        
+        exam_id = data.get('exam_id')
+        cut_score = data.get('cut_score')
+        credits = data.get('credits')
+        
+        if exam_id is None:
+            return jsonify({"error": "exam_id is required"}), 400
+        if cut_score is None:
+            return jsonify({"error": "cut_score is required"}), 400
+        if credits is None:
+            return jsonify({"error": "credits is required"}), 400
+        
+        # Validate data types and ranges
+        try:
+            exam_id = int(exam_id)
+            cut_score = int(cut_score)
+            credits = int(credits)
+        except (ValueError, TypeError):
+            return jsonify({"error": "exam_id, cut_score, and credits must be integers"}), 400
+        
+        if not (1 <= exam_id <= 38):
+            return jsonify({"error": "exam_id must be between 1 and 38"}), 400
+        
+        if not (20 <= cut_score <= 80):
+            return jsonify({"error": "cut_score must be between 20 and 80"}), 400
+        
+        if credits < 0:
+            return jsonify({"error": "credits must be a positive number"}), 400
+        
         institution_id = membership['institution_id']
         
         acceptance = {
             "institution_id": institution_id,
-            "exam_id": data.get('exam_id'),
-            "cut_score": data.get('cut_score'),
-            "credits": data.get('credits'),
+            "exam_id": exam_id,
+            "cut_score": cut_score,
+            "credits": credits,
             "related_course": data.get('related_course', ''),
             "updated_by_contact_id": None  # Could link to institution_members
         }
@@ -571,6 +670,10 @@ def update_acceptance(acceptance_id):
         schema:
           type: object
           properties:
+            exam_id:
+              type: integer
+              example: 5
+              description: ID of the CLEP exam (1-38)
             cut_score:
               type: integer
               example: 55
@@ -623,12 +726,44 @@ def update_acceptance(acceptance_id):
             return jsonify({"error": "Acceptance not found"}), 404
         
         updates = {}
+        if 'exam_id' in data:
+            exam_id = data['exam_id']
+            # Validate exam_id
+            try:
+                exam_id = int(exam_id)
+                if not (1 <= exam_id <= 38):
+                    return jsonify({"error": "exam_id must be between 1 and 38"}), 400
+                updates['exam_id'] = exam_id
+            except (ValueError, TypeError):
+                return jsonify({"error": "exam_id must be an integer"}), 400
+        
         if 'cut_score' in data:
-            updates['cut_score'] = data['cut_score']
+            cut_score = data['cut_score']
+            # Validate cut_score
+            try:
+                cut_score = int(cut_score)
+                if not (20 <= cut_score <= 80):
+                    return jsonify({"error": "cut_score must be between 20 and 80"}), 400
+                updates['cut_score'] = cut_score
+            except (ValueError, TypeError):
+                return jsonify({"error": "cut_score must be an integer"}), 400
+        
         if 'credits' in data:
-            updates['credits'] = data['credits']
+            credits = data['credits']
+            # Validate credits
+            try:
+                credits = int(credits)
+                if credits < 0:
+                    return jsonify({"error": "credits must be a positive number"}), 400
+                updates['credits'] = credits
+            except (ValueError, TypeError):
+                return jsonify({"error": "credits must be an integer"}), 400
+        
         if 'related_course' in data:
             updates['related_course'] = data['related_course']
+        
+        if not updates:
+            return jsonify({"error": "No fields to update"}), 400
         
         result = supabase.table('acceptances').update(updates).eq(
             'id', acceptance_id
@@ -736,6 +871,492 @@ def health_check():
               example: institutions
     """
     return jsonify({"status": "healthy", "service": "institutions"}), 200
+
+
+# ============================================================================
+# EMAIL TEST ENDPOINT
+# ============================================================================
+
+@app.route('/email/test', methods=['POST'])
+def test_email():
+    """
+    Test email sending functionality
+    ---
+    tags:
+      - Health
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - to
+          properties:
+            to:
+              type: string
+              example: test@example.com
+              description: Recipient email address
+    responses:
+      200:
+        description: Email sent successfully
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            message:
+              type: string
+      400:
+        description: Email address required
+      500:
+        description: Failed to send email
+    """
+    try:
+        data = request.get_json()
+        to_email = data.get('to')
+        
+        if not to_email:
+            return jsonify({"error": "Email address required"}), 400
+        
+        # Send test email
+        success = send_email(
+            to_email=to_email,
+            subject="Test Email from CLEP Bridge",
+            body="This is a test email to verify the email service is working correctly."
+        )
+        
+        if success:
+            return jsonify({
+                "success": True,
+                "message": f"Test email sent to {to_email}"
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Failed to send test email. Check logs for details."
+            }), 500
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
+# ADMIN ENDPOINTS (Platform Admin Only)
+# ============================================================================
+
+@app.route('/admin/institutions', methods=['GET'])
+@require_platform_admin
+def get_admin_institutions():
+    """Get list of all institutions with filters (admin only)
+    ---
+    tags:
+      - Admin
+    security:
+      - Bearer: []
+    parameters:
+      - name: state
+        in: query
+        type: string
+        description: Filter by state (e.g., NY, CA)
+      - name: last_updated_before
+        in: query
+        type: string
+        description: Filter institutions last updated before this date (ISO format)
+      - name: last_updated_after
+        in: query
+        type: string
+        description: Filter institutions last updated after this date (ISO format)
+      - name: limit
+        in: query
+        type: integer
+        description: Limit number of results (default 100)
+    responses:
+      200:
+        description: List of institutions
+        schema:
+          type: object
+          properties:
+            institutions:
+              type: array
+              items:
+                type: object
+            total:
+              type: integer
+      403:
+        description: Not authorized (platform admin required)
+    """
+    try:
+        # Build query
+        query = supabase.table('institutions').select('*')
+        
+        # Apply filters
+        state = request.args.get('state')
+        if state:
+            query = query.eq('state', state)
+        
+        last_updated_before = request.args.get('last_updated_before')
+        if last_updated_before:
+            query = query.lt('last_updated', last_updated_before)
+        
+        last_updated_after = request.args.get('last_updated_after')
+        if last_updated_after:
+            query = query.gt('last_updated', last_updated_after)
+        
+        # Apply limit
+        limit = request.args.get('limit', 100, type=int)
+        query = query.limit(limit)
+        
+        # Execute query
+        result = query.execute()
+        
+        return jsonify({
+            "institutions": result.data,
+            "total": len(result.data)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/admin/acceptances/feedback', methods=['GET'])
+@require_platform_admin
+def get_acceptances_feedback():
+    """Get CLEP acceptances sorted by feedback (admin only)
+    ---
+    tags:
+      - Admin
+    security:
+      - Bearer: []
+    parameters:
+      - name: sort_by
+        in: query
+        type: string
+        description: Sort by 'dislikes' (default), 'likes', or 'dislike_ratio'
+      - name: limit
+        in: query
+        type: integer
+        description: Limit number of results (default 50)
+    responses:
+      200:
+        description: List of acceptances with feedback
+        schema:
+          type: object
+          properties:
+            acceptances:
+              type: array
+              items:
+                type: object
+      403:
+        description: Not authorized (platform admin required)
+    """
+    try:
+        sort_by = request.args.get('sort_by', 'dislikes')
+        limit = request.args.get('limit', 50, type=int)
+        
+        # Get acceptances with institution and exam details
+        result = supabase.table('acceptances').select(
+            '*, institutions(id, name, city, state), exams(id, name)'
+        ).limit(limit).execute()
+        
+        acceptances = result.data
+        
+        # Calculate dislike ratio and sort
+        for acceptance in acceptances:
+            total_votes = acceptance['likes'] + acceptance['dislikes']
+            acceptance['total_votes'] = total_votes
+            acceptance['dislike_ratio'] = (
+                acceptance['dislikes'] / total_votes if total_votes > 0 else 0
+            )
+        
+        # Sort based on parameter
+        if sort_by == 'likes':
+            acceptances.sort(key=lambda x: x['likes'], reverse=True)
+        elif sort_by == 'dislike_ratio':
+            acceptances.sort(key=lambda x: x['dislike_ratio'], reverse=True)
+        else:  # default to dislikes
+            acceptances.sort(key=lambda x: x['dislikes'], reverse=True)
+        
+        return jsonify({"acceptances": acceptances}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/admin/email/send', methods=['POST'])
+@require_platform_admin
+def send_bulk_emails():
+    """Send magic link emails to selected institutions (admin only)
+    ---
+    tags:
+      - Admin
+    security:
+      - Bearer: []
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - institution_ids
+          properties:
+            institution_ids:
+              type: array
+              items:
+                type: string
+              description: Array of institution UUIDs to send emails to
+            base_url:
+              type: string
+              description: Base URL for magic links (default from env)
+    responses:
+      200:
+        description: Emails sent successfully
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            sent_count:
+              type: integer
+            failed_count:
+              type: integer
+            details:
+              type: array
+      403:
+        description: Not authorized (platform admin required)
+    """
+    try:
+        data = request.get_json()
+        institution_ids = data.get('institution_ids', [])
+        update_link = data.get('update_link', os.getenv('FRONTEND_BASE_URL'))
+        
+        print(f"[DEBUG] update_link value: '{update_link}'")
+        print(f"[DEBUG] FRONTEND_BASE_URL env: '{os.getenv('FRONTEND_BASE_URL')}'")
+        
+        if not institution_ids:
+            return jsonify({"error": "institution_ids required"}), 400
+        
+        user = get_current_user()
+        sent_count = 0
+        failed_count = 0
+        details = []
+        
+        for inst_id in institution_ids:
+            try:
+                # Get institution details
+                inst = supabase.table('institutions').select('*').eq('id', inst_id).single().execute()
+                
+                if not inst.data:
+                    details.append({"institution_id": inst_id, "status": "failed", "error": "Institution not found"})
+                    failed_count += 1
+                    continue
+                
+                institution = inst.data
+                
+                # Get primary contact email
+                contact = supabase.table('contacts').select('email, first_name, last_name').eq(
+                    'institution_id', inst_id
+                ).limit(1).execute()
+                
+                recipient_email = contact.data[0]['email'] if contact.data else None
+                
+                if not recipient_email:
+                    details.append({"institution_id": inst_id, "status": "failed", "error": "No contact email found"})
+                    failed_count += 1
+                    continue
+                
+                # Send CLEP policy reminder email
+                print(f"[DEBUG] About to send CLEP policy reminder to {recipient_email}")
+                success = send_clep_policy_reminder(
+                    to_email=recipient_email,
+                    update_link=update_link
+                )
+                print(f"[DEBUG] Email send result: {success}")
+                
+                if success:
+                    # Log sent email
+                    supabase.table('sent_emails').insert({
+                        'institution_id': inst_id,
+                        'sent_to': recipient_email,
+                        'subject': 'Update Your CLEP Transfer Policy',
+                        'body': f'CLEP policy reminder sent to {recipient_email}',
+                        'sent_by': user.id
+                    }).execute()
+                    
+                    details.append({"institution_id": inst_id, "status": "sent", "email": recipient_email})
+                    sent_count += 1
+                else:
+                    details.append({"institution_id": inst_id, "status": "failed", "error": "Email service error"})
+                    failed_count += 1
+                    
+            except Exception as e:
+                details.append({"institution_id": inst_id, "status": "failed", "error": str(e)})
+                failed_count += 1
+        
+        return jsonify({
+            "success": True,
+            "sent_count": sent_count,
+            "failed_count": failed_count,
+            "details": details
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/admin/email/history', methods=['GET'])
+@require_platform_admin
+def get_email_history():
+    """Get history of sent emails (admin only)
+    ---
+    tags:
+      - Admin
+    security:
+      - Bearer: []
+    parameters:
+      - name: limit
+        in: query
+        type: integer
+        description: Limit number of results (default 50)
+      - name: institution_id
+        in: query
+        type: string
+        description: Filter by institution UUID
+    responses:
+      200:
+        description: Email history
+        schema:
+          type: object
+          properties:
+            emails:
+              type: array
+              items:
+                type: object
+      403:
+        description: Not authorized (platform admin required)
+    """
+    try:
+        limit = request.args.get('limit', 50, type=int)
+        institution_id = request.args.get('institution_id')
+        
+        # Build query
+        query = supabase.table('sent_emails').select(
+            '*, institutions(id, name, city, state)'
+        ).order('sent_at', desc=True).limit(limit)
+        
+        # Apply institution filter if provided
+        if institution_id:
+            query = query.eq('institution_id', institution_id)
+        
+        result = query.execute()
+        
+        return jsonify({"emails": result.data}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
+# LEARNER FEEDBACK ENDPOINTS
+# ============================================================================
+
+@app.route('/acceptances/<acceptance_id>/like', methods=['POST'])
+def like_acceptance(acceptance_id):
+    """Increment likes for an acceptance
+    ---
+    tags:
+      - Feedback
+    parameters:
+      - name: acceptance_id
+        in: path
+        required: true
+        type: string
+        description: UUID of the acceptance
+    responses:
+      200:
+        description: Like recorded successfully
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            likes:
+              type: integer
+      404:
+        description: Acceptance not found
+    """
+    try:
+        # Get current likes count
+        acceptance = supabase.table('acceptances').select('likes').eq(
+            'id', acceptance_id
+        ).single().execute()
+        
+        if not acceptance.data:
+            return jsonify({"error": "Acceptance not found"}), 404
+        
+        # Increment likes
+        new_likes = acceptance.data['likes'] + 1
+        result = supabase.table('acceptances').update({
+            'likes': new_likes
+        }).eq('id', acceptance_id).execute()
+        
+        return jsonify({
+            "success": True,
+            "likes": new_likes
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/acceptances/<acceptance_id>/dislike', methods=['POST'])
+def dislike_acceptance(acceptance_id):
+    """Increment dislikes for an acceptance
+    ---
+    tags:
+      - Feedback
+    parameters:
+      - name: acceptance_id
+        in: path
+        required: true
+        type: string
+        description: UUID of the acceptance
+    responses:
+      200:
+        description: Dislike recorded successfully
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            dislikes:
+              type: integer
+      404:
+        description: Acceptance not found
+    """
+    try:
+        # Get current dislikes count
+        acceptance = supabase.table('acceptances').select('dislikes').eq(
+            'id', acceptance_id
+        ).single().execute()
+        
+        if not acceptance.data:
+            return jsonify({"error": "Acceptance not found"}), 404
+        
+        # Increment dislikes
+        new_dislikes = acceptance.data['dislikes'] + 1
+        result = supabase.table('acceptances').update({
+            'dislikes': new_dislikes
+        }).eq('id', acceptance_id).execute()
+        
+        return jsonify({
+            "success": True,
+            "dislikes": new_dislikes
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':

@@ -36,7 +36,7 @@ export default function ManagePage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md px-4">
+      <div className="w-full max-w-2xl px-6">
         {/* Align header and logout button */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-gray-900">
@@ -45,12 +45,12 @@ export default function ManagePage() {
           <button
             onClick={handleLogout}
             disabled={loading}
-            className="px-4 py-2 bg-[#66b10e] hover:bg-[#5a9e0d] text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-[#66b10e] hover:bg-[#5a9e0d] text-gray-950 font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Logging out..." : "Logout"}
           </button>
         </div>
-        <InstituteForm instituteId="12345" />
+        <InstituteForm />
       </div>
     </main>
   );

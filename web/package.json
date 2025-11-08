@@ -2,6 +2,7 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:5001",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,8 +10,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.80.0",
+    "@types/mapbox-gl": "^3.4.1",
+    "mapbox-gl": "^3.16.0",
     "next": "16.0.1",
+    "openai": "^6.8.1",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
