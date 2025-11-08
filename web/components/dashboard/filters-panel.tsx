@@ -16,7 +16,7 @@ export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
   const [radius, setRadius] = useState(50);
 
   return (
-    <aside className="rounded-xl border border-[#bebebe] bg-white p-5">
+    <aside className="rounded-3xl border border-[#d5e3cf] bg-white p-5 shadow-lg shadow-black/5">
       <p className="text-xs font-semibold uppercase tracking-wide text-[#6ebf10]">
         Filters
       </p>

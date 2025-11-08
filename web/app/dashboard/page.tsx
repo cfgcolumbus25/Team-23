@@ -2,7 +2,7 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { FiltersPanel } from "@/components/dashboard/filters-panel";
 import { InstitutionList } from "@/components/dashboard/institution-list";
 import { KeyStatsCard } from "@/components/dashboard/key-stats-card";
-import { MapPlaceholder } from "@/components/dashboard/map-placeholder";
+import { MapSection } from "@/components/dashboard/map-section";
 import { ProfileSummaryCard } from "@/components/dashboard/profile-summary-card";
 
 const mockLearner = {
@@ -12,6 +12,10 @@ const mockLearner = {
     { code: "BIO-101", label: "Biology", score: 62 },
     { code: "HIS-201", label: "US History I", score: 58 },
   ],
+  coordinates: {
+    lat: 33.4484,
+    lng: -112.074,
+  },
 };
 
 const mockMajors = ["Biology", "Education", "Business", "General Studies"];
@@ -22,6 +26,8 @@ const mockInstitutions = [
     zip: "85201",
     credits: 12,
     lastUpdated: "Mar 2024",
+    lat: 33.4152,
+    lng: -111.8315,
   },
   {
     name: "Sonoran Polytechnic",
@@ -29,6 +35,8 @@ const mockInstitutions = [
     zip: "85281",
     credits: 9,
     lastUpdated: "Jan 2024",
+    lat: 33.4255,
+    lng: -111.94,
   },
   {
     name: "Cactus Valley College",
@@ -36,6 +44,8 @@ const mockInstitutions = [
     zip: "85224",
     credits: 6,
     lastUpdated: "Aug 2023",
+    lat: 33.3062,
+    lng: -111.8413,
   },
 ];
 const mockStats = [
@@ -58,7 +68,7 @@ const mockStats = [
 
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-[#bebebe] p-6 text-[#1c1c1c]">
+    <main className="min-h-screen bg-[#f2f2f2] p-6 text-[#1c1c1c]">
       <div className="flex w-full flex-col gap-6">
         <DashboardHeader
           badge="Modern States - CLEP Acceptance Tools"
@@ -71,10 +81,17 @@ export default function DashboardPage() {
           <KeyStatsCard stats={mockStats} />
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-3 lg:items-start">
+        <section className="grid gap-4 lg:grid-cols-3 lg:auto-rows-min">
           <FiltersPanel learner={mockLearner} majors={mockMajors} />
-          <MapPlaceholder />
-          <InstitutionList institutions={mockInstitutions} />
+          <div className="lg:col-span-2">
+            <MapSection
+              institutions={mockInstitutions}
+              learnerLocation={mockLearner.coordinates}
+            />
+          </div>
+          <div className="lg:col-span-3">
+            <InstitutionList institutions={mockInstitutions} />
+          </div>
         </section>
       </div>
     </main>

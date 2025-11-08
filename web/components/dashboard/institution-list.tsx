@@ -12,15 +12,15 @@ type InstitutionListProps = {
 
 export function InstitutionList({ institutions }: InstitutionListProps) {
   return (
-    <section className="rounded-xl border border-[#bebebe] bg-white p-5">
-      <div className="flex items-center justify-between">
+    <section className="rounded-3xl border border-[#d5e3cf] bg-white p-6 shadow-lg shadow-black/5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-[#6ebf10]">
             Institutions
           </p>
           <h2 className="text-lg font-semibold text-[#1c1c1c]">Matching results</h2>
         </div>
-        <button className="rounded-lg border border-[#6ebf10] px-3 py-1 text-xs font-semibold text-[#6ebf10]">
+        <button className="rounded-full border border-[#6ebf10] px-4 py-1.5 text-xs font-semibold text-[#6ebf10]">
           Export
         </button>
       </div>
@@ -28,7 +28,7 @@ export function InstitutionList({ institutions }: InstitutionListProps) {
         {institutions.map((institution) => (
           <article
             key={institution.name}
-            className="rounded-lg border border-[#bebebe] p-3 text-sm"
+            className="rounded-2xl border border-[#e1eddc] bg-[#f9fff2] p-4 text-sm shadow-sm"
           >
             <div className="flex items-center justify-between">
               <p className="font-semibold text-[#1c1c1c]">{institution.name}</p>
