@@ -5,6 +5,7 @@ import InputField from "@/components/onboarding/InputField";
 import MultiSelect, { type MultiSelectOption } from "@/components/onboarding/MultiSelect";
 import ExamScoreFields from "@/components/onboarding/ExamScoreFields";
 import Toast from "@/components/onboarding/Toast";
+import { useRouter } from "next/navigation";
 
 // we set this const to the list of all possible CLEP exams which has been 
 // harcoded as its static. pulled from the collegeboard clep website. 
@@ -79,6 +80,7 @@ export default function OnboardingPage() {
   const [selectedExams, setSelectedExams] = React.useState<string[]>([]);
   const [scoresByExam, setScoresByExam] = React.useState<Record<string, string>>({});
   const [showToast, setShowToast] = React.useState(false);
+  const router = useRouter();
 
   // manage errors for the input fields 
   const [errors, setErrors] = React.useState<{
@@ -163,6 +165,8 @@ export default function OnboardingPage() {
     // eslint-disable-next-line no-console
     console.log("Onboarding profile:", payload);
     setShowToast(true);
+    // after successful profile creation, route to dashboard
+    router.push("/dashboard");
   }
 
   // this function is called when the user changes the score for a CLEP exam
