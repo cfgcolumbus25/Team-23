@@ -79,15 +79,18 @@ export default function OnboardingPage() {
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [zip, setZip] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [selectedExams, setSelectedExams] = React.useState<string[]>([]);
   const [scoresByExam, setScoresByExam] = React.useState<Record<string, string>>({});
   const [showToast, setShowToast] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState('')
   const router = useRouter();
 
   // manage errors for the input fields 
   const [errors, setErrors] = React.useState<{
     name?: string;
     email?: string;
+    password?: string;
     zip?: string;
     exams?: string;
     examScores?: Record<string, string | undefined>;
@@ -159,29 +162,36 @@ export default function OnboardingPage() {
     const payload = {
       name: name.trim(),
       email: email.trim(),
-      zip: parseInt(zip, 10),
+      password: password.trim(),
+      zipcode: parseInt(zip, 10),
       exams: selectedExams.reduce((acc, exam) => {
         acc[exam] = scoresByExam[exam] ? parseInt(scoresByExam[exam], 10) : 0;
         return acc;
       }, {} as Record<string, number>),
-      maxCredits: undefined, // optional
+      maxcredits: undefined, // optional
     };
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/learners/login", {
+      const res = await fetch(`${API_BASE}/learners/signup`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify(payload), 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
-      const json = await res.json();
+      const json = await res.json().catch(() => null);
 
       if (!res.ok) {
-        console.error("Create user failed", res.status)
+        const msg = json?.error || "Failed to create user";
+        console.error(msg);
+
+        // Show an error toast instead of success
+        setToastMessage(msg); // you need a separate toast message state
+        setShowToast(true);
         return;
       }
 
-      console.log("User created:", json)
+      console.log("User created:", json);
+      setToastMessage("Profile created successfully!");
       setShowToast(true);
       router.push("/dashboard");
     } catch (err) {
@@ -197,7 +207,7 @@ export default function OnboardingPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4 text-slate-900">
       <Toast
-        message="Profile created successfully!"
+        message={toastMessage}
         show={showToast}
         onClose={() => setShowToast(false)}
       />
@@ -227,6 +237,16 @@ export default function OnboardingPage() {
             placeholder="jane@example.com"
             required
             error={errors.email}
+          />
+          <InputField
+            id="password"
+            label="Password"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            placeholder="Enter your password"
+            required
+            error={errors.password}
           />
           <InputField
             id="zip"
