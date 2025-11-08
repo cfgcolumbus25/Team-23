@@ -43,6 +43,8 @@ export default function DashboardPage() {
     { label: "Avg Credits", value: "0", helper: "Median awarded across matches" },
     { label: "Fresh Policies", value: "0%", helper: "Updated within last 12 months" },
   ]);
+  const [searchZipcode, setSearchZipcode] = useState<string>('');
+  const [exploreZipcode, setExploreZipcode] = useState<string>('');
 
   useEffect(() => {
     // Load user data from localStorage
@@ -60,6 +62,7 @@ export default function DashboardPage() {
         // Fetch institutions based on zipcode
         if (validatedData.zipcode) {
           fetchInstitutions(validatedData.zipcode);
+          setExploreZipcode(validatedData.zipcode);
         } else {
           setLoading(false);
         }
@@ -72,9 +75,13 @@ export default function DashboardPage() {
     }
   }, []);
 
-  async function fetchInstitutions(zipcode: string) {
+  async function fetchInstitutions(zipcode: string, exactMatch: boolean = false) {
     try {
-      const response = await fetch(`/api/institutions?zipcode=${zipcode}&radius=50`);
+      setLoading(true);
+      const url = exactMatch 
+        ? `/api/institutions?zipcode=${zipcode}&radius=50&exact=true`
+        : `/api/institutions?zipcode=${zipcode}&radius=50`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to fetch institutions');
       
       const data = await response.json();
@@ -105,6 +112,26 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }
+
+  const handleZipcodeSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const zipcode = searchZipcode.trim();
+    // Validate 5-digit zipcode
+    if (zipcode && /^\d{5}$/.test(zipcode)) {
+      setExploreZipcode(zipcode);
+      fetchInstitutions(zipcode, true); // Use exact match for explore mode
+      setSearchZipcode(''); // Clear the input after search
+    } else {
+      alert('Please enter a valid 5-digit zipcode');
+    }
+  };
+
+  const handleZipcodeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+    if (value.length <= 5) {
+      setSearchZipcode(value);
+    }
+  };
 
   // Create learner object for components
   const learner = userData ? {
@@ -215,6 +242,59 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* Explore mode: Show schools with accepted exams - side by side map and list */}
+            {/* Zipcode Search Bar */}
+            <section className="rounded-3xl border-2 border-[#d5e3cf] bg-white p-6 shadow-lg">
+              <form onSubmit={handleZipcodeSearch} className="flex flex-col sm:flex-row gap-4 items-end">
+                <div className="flex-1">
+                  <label htmlFor="zipcode-search" className="block text-sm font-semibold text-[#1c1c1c] mb-2">
+                    Search Schools by Zipcode
+                  </label>
+                  <input
+                    id="zipcode-search"
+                    type="text"
+                    inputMode="numeric"
+                    value={searchZipcode}
+                    onChange={handleZipcodeInputChange}
+                    placeholder="Enter a 5-digit zipcode (e.g., 10001)"
+                    className="w-full rounded-xl border-2 border-[#d5e3cf] bg-white px-4 py-3 text-[#1c1c1c] placeholder:text-[#8a8a8a] focus:border-[#6ebf10] focus:outline-none focus:ring-2 focus:ring-[#6ebf10]/20 transition-all"
+                    pattern="[0-9]{5}"
+                    maxLength={5}
+                    disabled={loading}
+                  />
+                  <div className="mt-2 flex items-center gap-4 flex-wrap">
+                    {exploreZipcode && (
+                      <p className="text-sm text-[#4a4a4a]">
+                        Currently showing schools in zipcode: <span className="font-semibold text-[#6ebf10]">{exploreZipcode}</span>
+                      </p>
+                    )}
+                    {exploreZipcode && userData?.zipcode && exploreZipcode !== userData.zipcode && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (userData.zipcode) {
+                            setExploreZipcode(userData.zipcode);
+                            fetchInstitutions(userData.zipcode, false);
+                            setSearchZipcode('');
+                          }
+                        }}
+                        className="text-sm font-semibold text-[#6ebf10] hover:text-[#5ca00d] underline transition-colors"
+                      >
+                        Reset to my zipcode ({userData.zipcode})
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={loading || searchZipcode.length !== 5}
+                    className="rounded-xl bg-[#6ebf10] px-6 py-3 text-base font-bold text-white shadow-md hover:bg-[#5ca00d] transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ebf10]/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Searching...' : 'Search'}
+                  </button>
+                </div>
+              </form>
+            </section>
             <section className="grid gap-4 lg:grid-cols-2 lg:auto-rows-min">
               {/* Map on the left */}
               <div className="lg:col-span-1 flex flex-col gap-4">
@@ -228,7 +308,7 @@ export default function DashboardPage() {
                     lat: inst.lat,
                     lng: inst.lng,
                   }))}
-                  learnerLocation={learner.coordinates}
+                  learnerLocation={userLocation?.coordinates || learner.coordinates}
                 />
                 {/* AI-generated information about the top choice - under map */}
                 {institutionsExplore.length > 0 && (
@@ -243,7 +323,26 @@ export default function DashboardPage() {
               </div>
               {/* Institution list on the right */}
               <div className="lg:col-span-1">
-                <InstitutionListExplore institutions={institutionsExplore} />
+                {loading ? (
+                  <section className="rounded-3xl border border-[#d5e3cf] bg-white p-6 shadow-lg shadow-black/5">
+                    <div className="flex items-center justify-center h-64">
+                      <p className="text-lg text-[#4a4a4a]">Loading schools...</p>
+                    </div>
+                  </section>
+                ) : institutionsExplore.length === 0 ? (
+                  <section className="rounded-3xl border border-[#d5e3cf] bg-white p-6 shadow-lg shadow-black/5">
+                    <div className="flex flex-col items-center justify-center h-64 text-center">
+                      <p className="text-lg font-semibold text-[#1c1c1c] mb-2">No schools found</p>
+                      <p className="text-sm text-[#4a4a4a] mb-4">
+                        {exploreZipcode 
+                          ? `No institutions found for zipcode ${exploreZipcode}. Try searching a different zipcode.`
+                          : 'No institutions available. Try searching by zipcode.'}
+                      </p>
+                    </div>
+                  </section>
+                ) : (
+                  <InstitutionListExplore institutions={institutionsExplore} />
+                )}
               </div>
             </section>
           </>

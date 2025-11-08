@@ -108,6 +108,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const zipcode = searchParams.get('zipcode');
     const radius = parseInt(searchParams.get('radius') || '50', 10);
+    const exactMatch = searchParams.get('exact') === 'true';
 
     if (!zipcode) {
       return NextResponse.json(
@@ -139,12 +140,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Filter institutions by state (same state as user) or nearby states
-    // In production, calculate actual distance using coordinates
+    // Filter institutions based on exact match or state
     let nearbyInstitutions = institutions
       ?.filter(inst => {
         if (!inst.zip || !inst.state) return false;
-        // Filter by same state - in production, use distance calculation
+        // If exact match is requested, filter by exact zipcode
+        if (exactMatch) {
+          return inst.zip === zipcode;
+        }
+        // Otherwise, filter by same state - in production, use distance calculation
         return inst.state === userCoords.state;
       })
       .slice(0, 50) // Limit results
@@ -183,8 +187,8 @@ export async function GET(request: NextRequest) {
         };
       }) || [];
 
-    // Generate mock data if no institutions found
-    if (nearbyInstitutions.length === 0) {
+    // Generate mock data if no institutions found (only for non-exact searches)
+    if (nearbyInstitutions.length === 0 && !exactMatch) {
       const mockNames = ['University Of Dayton', 'Denison University', 'Ohio Northern University', 'Miami University', 'Ohio State University'];
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const center = STATE_CENTERS[userCoords.state] || { lat: 39.8283, lng: -98.5795 };
