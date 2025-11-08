@@ -12,12 +12,14 @@ type Learner = {
 type FiltersPanelProps = {
   learner: Learner;
   majors: string[];
+  onMinCreditsChange?: (credits: number) => void;
 };
 
 // Filter panel component for tailoring institution matches
-export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
+export function FiltersPanel({ learner, majors, onMinCreditsChange }: FiltersPanelProps) {
   // State for zip radius filter (in miles)
   const [radius, setRadius] = useState(50);
+  const [minCredits, setMinCredits] = useState(0);
 
   return (
     <aside className="rounded-3xl border border-[#d5e3cf] bg-white p-5 shadow-lg shadow-black/5">
@@ -77,7 +79,12 @@ export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
           <input
             type="number"
             min={0}
-            defaultValue={6}
+            value={minCredits}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              setMinCredits(value);
+              onMinCreditsChange?.(value);
+            }}
             className="w-full rounded-lg border border-[#bebebe] p-2"
           />
         </div>

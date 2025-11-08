@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [userLocation, setUserLocation] = useState<{ city: string; state: string; coordinates: { lat: number; lng: number } } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [minCredits, setMinCredits] = useState(0);
   const [stats, setStats] = useState([
     { label: "Matches", value: "0", helper: "Institutions aligned to CLEP exams" },
     { label: "Avg Credits", value: "0", helper: "Median awarded across matches" },
@@ -113,8 +114,41 @@ export default function DashboardPage() {
     coordinates: userLocation?.coordinates || { lat: 39.8283, lng: -98.5795 },
   } : null;
 
+  // Filter institutions by minimum credits
+  const filteredInstitutions = institutions.filter(inst => inst.credits >= minCredits);
+
+  // Update stats when institutions or filter changes
+  useEffect(() => {
+    const filtered = institutions.filter(inst => inst.credits >= minCredits);
+    if (filtered.length > 0) {
+      const matchCount = filtered.length;
+      const avgCredits = Math.round(
+        filtered.reduce((sum: number, inst: Institution) => sum + (inst.credits || 0), 0) / matchCount
+      );
+      const freshCount = filtered.filter((inst: Institution) => {
+        const date = new Date(inst.lastUpdated);
+        const yearAgo = new Date();
+        yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+        return date > yearAgo;
+      }).length;
+      const freshPercent = Math.round((freshCount / matchCount) * 100);
+
+      setStats([
+        { label: "Matches", value: matchCount.toString(), helper: "Institutions aligned to CLEP exams" },
+        { label: "Avg Credits", value: avgCredits.toString(), helper: "Median awarded across matches" },
+        { label: "Fresh Policies", value: `${freshPercent}%`, helper: "Updated within last 12 months" },
+      ]);
+    } else if (institutions.length === 0) {
+      setStats([
+        { label: "Matches", value: "0", helper: "Institutions aligned to CLEP exams" },
+        { label: "Avg Credits", value: "0", helper: "Median awarded across matches" },
+        { label: "Fresh Policies", value: "0%", helper: "Updated within last 12 months" },
+      ]);
+    }
+  }, [institutions, minCredits]);
+
   // Convert institutions to explore mode format (simplified)
-  const institutionsExplore: InstitutionWithExams[] = institutions.map(inst => ({
+  const institutionsExplore: InstitutionWithExams[] = filteredInstitutions.map(inst => ({
     ...inst,
     acceptedExams: Array.isArray(userData?.exams) && userData.exams.length > 0
       ? userData.exams.slice(0, 3).map(exam => ({
@@ -160,20 +194,20 @@ export default function DashboardPage() {
 
             {/* Filters, map, and matching institutions */}
             <section className="grid gap-4 lg:grid-cols-3 lg:auto-rows-min">
-              <FiltersPanel learner={learner} majors={[]} />
+              <FiltersPanel learner={learner} majors={[]} onMinCreditsChange={setMinCredits} />
               <div className="lg:col-span-2">
                 <MapSection
-                  institutions={institutions}
+                  institutions={filteredInstitutions}
                   learnerLocation={learner.coordinates}
                 />
               </div>
               <div className="lg:col-span-3">
-                <InstitutionList institutions={institutions} />
+                <InstitutionList institutions={filteredInstitutions} />
               </div>
               {/* AI-generated information about the top choice */}
-              {institutions.length > 0 && (
+              {filteredInstitutions.length > 0 && (
                 <div className="lg:col-span-3">
-                  <CollegeInfoCard institution={institutions[0]} />
+                  <CollegeInfoCard institution={filteredInstitutions[0]} />
                 </div>
               )}
             </section>
