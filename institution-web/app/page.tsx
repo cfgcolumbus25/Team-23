@@ -5,7 +5,7 @@ export default function Home() {
     <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
       <div className="max-w-2xl mx-auto text-center px-4">
         <h1 className="text-4xl font-bold mb-4 text-gray-900">
-          CLEPBridge Institution Portal
+          CLEP Acceptance Tool Institution Portal
         </h1>
         <p className="text-lg text-gray-600 mb-8">
           Manage your institution's CLEP exam acceptance policies
