@@ -10,10 +10,15 @@ type InstitutionWithExams = {
 // Props for institution list component in explore mode
 type InstitutionListExploreProps = {
   institutions: InstitutionWithExams[];
+  selectedInstitutionKey?: string | null;
+  onSelect?: (institution: InstitutionWithExams) => void;
 };
 
 // Component that displays institutions with their accepted CLEP exams
-export function InstitutionListExplore({ institutions }: InstitutionListExploreProps) {
+export function InstitutionListExplore({ institutions, selectedInstitutionKey, onSelect }: InstitutionListExploreProps) {
+  const getInstitutionKey = (institution: { name: string; zip: string }) =>
+    `${institution.name}-${institution.zip}`;
+
   return (
     <section className="rounded-3xl border border-[#d5e3cf] bg-white p-6 shadow-lg shadow-black/5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -32,8 +37,22 @@ export function InstitutionListExplore({ institutions }: InstitutionListExploreP
           const totalCredits = institution.acceptedExams.reduce((sum, exam) => sum + exam.credits, 0);
           return (
             <article
-              key={institution.name}
-              className="group flex flex-col rounded-2xl border-2 border-[#d5e3cf] bg-white p-5 shadow-md transition-all hover:border-[#6ebf10] hover:shadow-lg"
+              key={getInstitutionKey(institution)}
+              role={onSelect ? 'button' : undefined}
+              tabIndex={onSelect ? 0 : undefined}
+              onClick={() => onSelect?.(institution)}
+              onKeyDown={(event) => {
+                if (onSelect && (event.key === 'Enter' || event.key === ' ')) {
+                  event.preventDefault();
+                  onSelect(institution);
+                }
+              }}
+              className={[
+                "group flex flex-col rounded-2xl border-2 bg-white p-5 shadow-md transition-all hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6ebf10]",
+                selectedInstitutionKey === getInstitutionKey(institution)
+                  ? "border-[#6ebf10] shadow-lg"
+                  : "border-[#d5e3cf] hover:border-[#6ebf10]"
+              ].join(' ')}
             >
               <div className="mb-4 flex-shrink-0">
                 <div className="flex items-start justify-between gap-3 mb-3">
@@ -95,4 +114,3 @@ export function InstitutionListExplore({ institutions }: InstitutionListExploreP
     </section>
   );
 }
-

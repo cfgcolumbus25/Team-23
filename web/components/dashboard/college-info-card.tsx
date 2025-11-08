@@ -13,7 +13,7 @@ type Institution = {
 
 // Props for college info card component
 type CollegeInfoCardProps = {
-  institution: Institution;
+  institution: Institution | null;
 };
 
 // Component that displays AI-generated information about a college
@@ -22,11 +22,23 @@ export function CollegeInfoCard({ institution }: CollegeInfoCardProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const collegeName = institution?.name ?? null;
+  const collegeLocation = institution?.location ?? null;
+  const collegeCredits = institution?.credits ?? null;
+
   // Fetch college information from Gemini
   useEffect(() => {
+    if (!collegeName) {
+      setInfo(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     const fetchCollegeInfo = async () => {
       setLoading(true);
       setError(null);
+      setInfo(null);
 
       try {
         const response = await fetch('/api/college-info', {
@@ -35,9 +47,9 @@ export function CollegeInfoCard({ institution }: CollegeInfoCardProps) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            collegeName: institution.name,
-            location: institution.location,
-            credits: institution.credits,
+            collegeName,
+            location: collegeLocation,
+            credits: collegeCredits ?? undefined,
           }),
         });
 
@@ -74,7 +86,27 @@ export function CollegeInfoCard({ institution }: CollegeInfoCardProps) {
     };
 
     fetchCollegeInfo();
-  }, [institution]);
+  }, [collegeName, collegeLocation, collegeCredits]);
+
+  if (!institution) {
+    return (
+      <section className="rounded-3xl border border-[#d5e3cf] bg-white p-6 shadow-lg shadow-black/5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#6ebf10]">
+              AI Insights
+            </p>
+            <h2 className="text-lg font-semibold text-[#1c1c1c]">
+              Select a college to view insights
+            </h2>
+          </div>
+        </div>
+        <div className="mt-4 rounded-2xl border border-[#e1eddc] bg-[#f9fff2] p-4 text-sm text-[#4a4a4a]">
+          Pick a college from the list to generate a brief overview powered by Gemini.
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-3xl border border-[#d5e3cf] bg-white p-6 shadow-lg shadow-black/5">
@@ -113,4 +145,3 @@ export function CollegeInfoCard({ institution }: CollegeInfoCardProps) {
     </section>
   );
 }
-

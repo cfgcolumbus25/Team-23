@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { DashboardHeaderWithToggle } from "@/components/dashboard/dashboard-header-with-toggle";
 import { FiltersPanel } from "@/components/dashboard/filters-panel";
 import { InstitutionList } from "@/components/dashboard/institution-list";
@@ -31,11 +31,16 @@ type InstitutionWithExams = Institution & {
   acceptedExams: Array<{ name: string; credits: number; cutScore: number }>;
 };
 
+const getInstitutionKey = (institution: { name: string; zip: string }) =>
+  `${institution.name}-${institution.zip}`;
+
 export default function DashboardPage() {
   const [mode, setMode] = useState<'profile' | 'explore'>('profile');
   const [userData, setUserData] = useState<UserData | null>(null);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [userLocation, setUserLocation] = useState<{ city: string; state: string; coordinates: { lat: number; lng: number } } | null>(null);
+  const [selectedInstitutionKey, setSelectedInstitutionKey] = useState<string | null>(null);
+  const [selectedExploreInstitutionKey, setSelectedExploreInstitutionKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [minCredits, setMinCredits] = useState(0);
   const [stats, setStats] = useState([
@@ -142,17 +147,19 @@ export default function DashboardPage() {
   } : null;
 
   // Filter institutions by minimum credits
-  const filteredInstitutions = institutions.filter(inst => inst.credits >= minCredits);
+  const filteredInstitutions = useMemo(
+    () => institutions.filter(inst => inst.credits >= minCredits),
+    [institutions, minCredits]
+  );
 
-  // Update stats when institutions or filter changes
+  // Update stats and keep selection in sync when data changes
   useEffect(() => {
-    const filtered = institutions.filter(inst => inst.credits >= minCredits);
-    if (filtered.length > 0) {
-      const matchCount = filtered.length;
+    if (filteredInstitutions.length > 0) {
+      const matchCount = filteredInstitutions.length;
       const avgCredits = Math.round(
-        filtered.reduce((sum: number, inst: Institution) => sum + (inst.credits || 0), 0) / matchCount
+        filteredInstitutions.reduce((sum: number, inst: Institution) => sum + (inst.credits || 0), 0) / matchCount
       );
-      const freshCount = filtered.filter((inst: Institution) => {
+      const freshCount = filteredInstitutions.filter((inst: Institution) => {
         const date = new Date(inst.lastUpdated);
         const yearAgo = new Date();
         yearAgo.setFullYear(yearAgo.getFullYear() - 1);
@@ -165,26 +172,71 @@ export default function DashboardPage() {
         { label: "Avg Credits", value: avgCredits.toString(), helper: "Median awarded across matches" },
         { label: "Fresh Policies", value: `${freshPercent}%`, helper: "Updated within last 12 months" },
       ]);
-    } else if (institutions.length === 0) {
+    } else {
       setStats([
         { label: "Matches", value: "0", helper: "Institutions aligned to CLEP exams" },
         { label: "Avg Credits", value: "0", helper: "Median awarded across matches" },
         { label: "Fresh Policies", value: "0%", helper: "Updated within last 12 months" },
       ]);
     }
-  }, [institutions, minCredits]);
+
+    setSelectedInstitutionKey(prev => {
+      if (!filteredInstitutions.length) {
+        return null;
+      }
+      if (prev && filteredInstitutions.some(inst => getInstitutionKey(inst) === prev)) {
+        return prev;
+      }
+      return getInstitutionKey(filteredInstitutions[0]);
+    });
+  }, [filteredInstitutions]);
 
   // Convert institutions to explore mode format (simplified)
-  const institutionsExplore: InstitutionWithExams[] = filteredInstitutions.map(inst => ({
-    ...inst,
-    acceptedExams: Array.isArray(userData?.exams) && userData.exams.length > 0
-      ? userData.exams.slice(0, 3).map(exam => ({
-          name: exam.label,
-          credits: Math.floor(Math.random() * 4) + 3,
-          cutScore: 50,
-        }))
-      : [],
-  }));
+  const institutionsExplore: InstitutionWithExams[] = useMemo(() => {
+    return filteredInstitutions.map(inst => ({
+      ...inst,
+      acceptedExams: Array.isArray(userData?.exams) && userData.exams.length > 0
+        ? userData.exams.slice(0, 3).map(exam => ({
+            name: exam.label,
+            credits: Math.floor(Math.random() * 4) + 3,
+            cutScore: 50,
+          }))
+        : [],
+    }));
+  }, [filteredInstitutions, userData?.exams]);
+
+  useEffect(() => {
+    if (!institutionsExplore.length) {
+      setSelectedExploreInstitutionKey(null);
+      return;
+    }
+    setSelectedExploreInstitutionKey(prev => {
+      if (prev && institutionsExplore.some(inst => getInstitutionKey(inst) === prev)) {
+        return prev;
+      }
+      return getInstitutionKey(institutionsExplore[0]);
+    });
+  }, [institutionsExplore]);
+
+  const selectedInstitution = selectedInstitutionKey
+    ? filteredInstitutions.find(inst => getInstitutionKey(inst) === selectedInstitutionKey) || null
+    : null;
+
+  const selectedExploreInstitution = selectedExploreInstitutionKey
+    ? institutionsExplore.find(inst => getInstitutionKey(inst) === selectedExploreInstitutionKey) || null
+    : null;
+
+  const selectedExploreInstitutionSummary = selectedExploreInstitution
+    ? {
+        name: selectedExploreInstitution.name,
+        location: selectedExploreInstitution.location,
+        zip: selectedExploreInstitution.zip,
+        credits: selectedExploreInstitution.acceptedExams.reduce((sum, exam) => sum + exam.credits, 0),
+        lastUpdated: selectedExploreInstitution.lastUpdated,
+        lat: selectedExploreInstitution.lat,
+        lng: selectedExploreInstitution.lng,
+      }
+    : null;
 
   if (loading) {
     return (
@@ -229,12 +281,16 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="lg:col-span-3">
-                <InstitutionList institutions={filteredInstitutions} />
+                <InstitutionList
+                  institutions={filteredInstitutions}
+                  selectedInstitutionKey={selectedInstitutionKey}
+                  onSelect={(institution) => setSelectedInstitutionKey(getInstitutionKey(institution))}
+                />
               </div>
               {/* AI-generated information about the top choice */}
               {filteredInstitutions.length > 0 && (
                 <div className="lg:col-span-3">
-                  <CollegeInfoCard institution={filteredInstitutions[0]} />
+                  <CollegeInfoCard institution={selectedInstitution} />
                 </div>
               )}
             </section>
@@ -312,13 +368,7 @@ export default function DashboardPage() {
                 />
                 {/* AI-generated information about the top choice - under map */}
                 {institutionsExplore.length > 0 && (
-                  <CollegeInfoCard institution={{
-                    name: institutionsExplore[0].name,
-                    location: institutionsExplore[0].location,
-                    zip: institutionsExplore[0].zip,
-                    credits: institutionsExplore[0].acceptedExams.reduce((sum, exam) => sum + exam.credits, 0),
-                    lastUpdated: institutionsExplore[0].lastUpdated,
-                  }} />
+                  <CollegeInfoCard institution={selectedExploreInstitutionSummary} />
                 )}
               </div>
               {/* Institution list on the right */}
@@ -341,7 +391,11 @@ export default function DashboardPage() {
                     </div>
                   </section>
                 ) : (
-                  <InstitutionListExplore institutions={institutionsExplore} />
+                  <InstitutionListExplore
+                    institutions={institutionsExplore}
+                    selectedInstitutionKey={selectedExploreInstitutionKey}
+                    onSelect={(institution) => setSelectedExploreInstitutionKey(getInstitutionKey(institution))}
+                  />
                 )}
               </div>
             </section>
