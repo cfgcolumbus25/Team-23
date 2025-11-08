@@ -1,24 +1,24 @@
-'use client'
+"use client";
 
-import { updateInstitute } from '../lib/actions'
-import { useState } from 'react'
+import { updateInstitute } from "../lib/actions";
+import { useState } from "react";
 
 export function InstituteForm({ instituteId }: { instituteId: string }) {
-  const updateInstituteWithId = updateInstitute.bind(null, instituteId)
+  const updateInstituteWithId = updateInstitute.bind(null, instituteId);
 
   const [formData, setFormData] = useState({
-    maxCredits: '',
+    maxCredits: "",
     useFailedCourses: false,
     enrolledCanUseClep: false,
-    scoreValidity: '',
-  })
+    scoreValidity: "",
+  });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, type, value, checked } = e.target
-    setFormData(prev => ({
+    const { name, type, value, checked } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
+      [name]: type === "checkbox" ? checked : value,
+    }));
   }
 
   return (
@@ -27,7 +27,8 @@ export function InstituteForm({ instituteId }: { instituteId: string }) {
       className="flex flex-col gap-4 p-6 bg-white rounded-xl shadow-md w-full max-w-md"
     >
       <div>
-        <label className="block text-sm font-medium mb-1">
+        {/* Darker text for better readability */}
+        <label className="block text-sm font-semibold mb-1 text-gray-900">
           Max Credits (per two semesters)
         </label>
         <input
@@ -35,12 +36,12 @@ export function InstituteForm({ instituteId }: { instituteId: string }) {
           name="maxCredits"
           value={formData.maxCredits}
           onChange={handleChange}
-          className="w-full border border-gray-300 rounded-lg p-2"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-700"
           required
         />
       </div>
 
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm font-semibold text-gray-900">
         <input
           type="checkbox"
           name="useFailedCourses"
@@ -50,7 +51,7 @@ export function InstituteForm({ instituteId }: { instituteId: string }) {
         Allow failed courses to transfer
       </label>
 
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex items-center gap-2 text-sm font-semibold text-gray-900">
         <input
           type="checkbox"
           name="enrolledCanUseClep"
@@ -61,7 +62,8 @@ export function InstituteForm({ instituteId }: { instituteId: string }) {
       </label>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
+        {/* Darker text for better readability */}
+        <label className="block text-sm font-semibold mb-1 text-gray-900">
           Score Validity (in years)
         </label>
         <input
@@ -69,7 +71,7 @@ export function InstituteForm({ instituteId }: { instituteId: string }) {
           name="scoreValidity"
           value={formData.scoreValidity}
           onChange={handleChange}
-          className="w-full border border-gray-300 rounded-lg p-2"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder:text-gray-700"
           required
         />
       </div>
@@ -80,8 +82,6 @@ export function InstituteForm({ instituteId }: { instituteId: string }) {
       >
         Save Settings
       </button>
-
     </form>
-  )
+  );
 }
-
