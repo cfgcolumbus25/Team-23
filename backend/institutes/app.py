@@ -1094,12 +1094,14 @@ def send_bulk_emails():
                 )
                 
                 # Send email
+                print(f"[DEBUG] About to send email to {recipient_email} with subject: {subject}")
                 success = send_email(
                     to_email=recipient_email,
                     subject=subject,
                     body=text_body,
                     html_body=html_body
                 )
+                print(f"[DEBUG] Email send result: {success}")
                 
                 if success:
                     # Log sent email

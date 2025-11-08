@@ -36,6 +36,10 @@ def send_email(
         send_email(["user1@example.com", "user2@example.com"], "Update", "Message", "<p>HTML</p>")
     """
     from_email = os.getenv("FROM_EMAIL")
+    mock_email = os.getenv("MOCK_EMAIL")  # Email to use for testing
+    
+    logger.info(f"send_email called: to={to_email}, subject='{subject}'")
+    logger.info(f"Environment: FROM_EMAIL={from_email}, MOCK_EMAIL={mock_email}, RESEND_API_KEY={'set' if resend.api_key else 'not set'}")
     
     if not resend.api_key:
         logger.error("RESEND_API_KEY not configured")
@@ -51,6 +55,12 @@ def send_email(
     if not recipients:
         logger.error("No recipient email addresses provided")
         return False
+    
+    # If MOCK_EMAIL is set, redirect all emails to mock address
+    original_recipients = recipients.copy()
+    if mock_email:
+        logger.info(f"MOCK_EMAIL mode: Redirecting email from {recipients} to {mock_email}")
+        recipients = [mock_email]
     
     try:
         params = {
@@ -86,6 +96,7 @@ def send_clep_policy_reminder(to_email: Union[str, List[str]], update_link: Opti
         bool: True if email sent successfully, False otherwise
     """
     from_email = os.getenv("FROM_EMAIL")
+    mock_email = os.getenv("MOCK_EMAIL")  # Email to use for testing
     
     if not resend.api_key:
         logger.error("RESEND_API_KEY not configured")
@@ -109,6 +120,12 @@ def send_clep_policy_reminder(to_email: Union[str, List[str]], update_link: Opti
     if not recipients:
         logger.error("No recipient email addresses provided")
         return False
+    
+    # If MOCK_EMAIL is set, redirect all emails to mock address
+    original_recipients = recipients.copy()
+    if mock_email:
+        logger.info(f"MOCK_EMAIL mode: Redirecting CLEP reminder from {recipients} to {mock_email}")
+        recipients = [mock_email]
     
     subject = "Update Your CLEP Transfer Policy"
     
