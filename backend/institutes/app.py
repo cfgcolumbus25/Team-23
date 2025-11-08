@@ -523,6 +523,8 @@ def add_acceptance():
               type: boolean
             acceptance:
               type: object
+      400:
+        description: Missing required fields
       401:
         description: Not authenticated
       403:
@@ -543,13 +545,46 @@ def add_acceptance():
             return jsonify({"error": "Insufficient permissions"}), 403
         
         data = request.get_json()
+        
+        # Validate required fields
+        if not data:
+            return jsonify({"error": "Request body required"}), 400
+        
+        exam_id = data.get('exam_id')
+        cut_score = data.get('cut_score')
+        credits = data.get('credits')
+        
+        if exam_id is None:
+            return jsonify({"error": "exam_id is required"}), 400
+        if cut_score is None:
+            return jsonify({"error": "cut_score is required"}), 400
+        if credits is None:
+            return jsonify({"error": "credits is required"}), 400
+        
+        # Validate data types and ranges
+        try:
+            exam_id = int(exam_id)
+            cut_score = int(cut_score)
+            credits = int(credits)
+        except (ValueError, TypeError):
+            return jsonify({"error": "exam_id, cut_score, and credits must be integers"}), 400
+        
+        if not (1 <= exam_id <= 38):
+            return jsonify({"error": "exam_id must be between 1 and 38"}), 400
+        
+        if not (20 <= cut_score <= 80):
+            return jsonify({"error": "cut_score must be between 20 and 80"}), 400
+        
+        if credits < 0:
+            return jsonify({"error": "credits must be a positive number"}), 400
+        
         institution_id = membership['institution_id']
         
         acceptance = {
             "institution_id": institution_id,
-            "exam_id": data.get('exam_id'),
-            "cut_score": data.get('cut_score'),
-            "credits": data.get('credits'),
+            "exam_id": exam_id,
+            "cut_score": cut_score,
+            "credits": credits,
             "related_course": data.get('related_course', ''),
             "updated_by_contact_id": None  # Could link to institution_members
         }
