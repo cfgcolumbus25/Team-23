@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
-from supabase_client import supabase
-from .models import LearnerCreate, LearnerExam, InstitutionHit, Favorite
+from backend.learners.services.supabase_client import supabase
+from backend.learners.models import LearnerCreate, LearnerExam, InstitutionHit, Favorite
 
 
 def _freshness(ts: Optional[str]) -> str:
