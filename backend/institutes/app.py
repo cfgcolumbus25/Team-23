@@ -5,6 +5,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from supabase_client import supabase
 from datetime import datetime
+from utils.email import send_email
 import os
 
 app = Flask(__name__)
@@ -18,6 +19,44 @@ app.register_blueprint(send_verification_bp)
 def health_check():
     """Simple health check endpoint"""
     return jsonify({"status": "healthy", "service": "institutes"}), 200
+
+
+# Email test endpoint
+@app.route('/email/test', methods=['POST'])
+def test_email():
+    """
+    Test email sending functionality
+    
+    Expected body: { "to": "recipient@example.com" }
+    Returns: Success or error message
+    """
+    try:
+        data = request.get_json()
+        to_email = data.get('to')
+        
+        if not to_email:
+            return jsonify({"error": "Email address required"}), 400
+        
+        # Send test email
+        success = send_email(
+            to_email=to_email,
+            subject="Test Email from CLEP Bridge",
+            body="This is a test email to verify the email service is working correctly."
+        )
+        
+        if success:
+            return jsonify({
+                "success": True,
+                "message": f"Test email sent to {to_email}"
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Failed to send test email. Check logs for details."
+            }), 500
+            
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # 1. Validate magic token and fetch institution data
