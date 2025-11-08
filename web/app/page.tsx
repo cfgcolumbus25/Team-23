@@ -1,65 +1,122 @@
-import Image from "next/image";
+import Link from "next/link";
 
+// function to return the home landing page, previously redirected to the user login page 
+// now we allow access to the dashboard without logging in
 export default function Home() {
+  // return the home landing page with the header and the footer
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    // main container for the home page
+    <main className="min-h-screen bg-slate-100 text-slate-900 flex flex-col">
+      {/* header for the home page */}
+      <header className="border-b border-[#bebebe] bg-white/90 backdrop-blur">
+        {/* container for the header */}
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-2">
+            {/* logo for the home page */}
+            <div className="h-8 w-8 rounded-md bg-[#6ebf10]" />
+            <span className="text-lg font-bold text-[#1c1c1c]">CLEPBridge</span>
+          </div>
+          {/* navigation for the home page */}
+          <nav className="flex items-center gap-4">
+            {/* link to the dashboard */}
+            <Link
+              href="/dashboard"
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-[#1c1c1c] hover:underline"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Dashboard
+            </Link>
+            {/* link to the login page */}
+            <Link
+              href="/login"
+              className="rounded-md px-3 py-1.5 text-sm font-semibold text-[#1c1c1c] hover:underline"
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              Log In
+            </Link>
+            {/* link to the onboarding page */}
+            <Link
+              href="/onboarding"
+              className="rounded-md bg-[#6ebf10] px-3 py-1.5 text-sm font-semibold text-white shadow transition hover:bg-[#5aa50c] focus:outline-none focus:ring-2 focus:ring-[#6ebf10]/20"
+            >
+              Create Account
+            </Link>
+          </nav>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      {/* main content for the home page */}
+      <div className="flex-1">
+        {/* container for the main content */}
+        <section className="mx-auto max-w-6xl px-4">
+          {/* container for the main content */}
+          <div className="flex flex-col items-center gap-6 pt-24 pb-16 text-center sm:pt-28 sm:pb-20">
+            {/* title for the home page */}
+            <h1 className="text-4xl font-bold leading-tight text-[#1c1c1c] sm:text-5xl">
+              Modern States — CLEP Acceptance Tools
+            </h1>
+            {/* description for the home page */}
+            <p className="max-w-2xl text-sm text-[#4a4a4a] sm:text-base">
+              Explore institutions, credit policies, and matches for CLEP exams. Use the dashboard
+              right away, or sign in to create and save your profile.
+            </p>
+            {/* container for the buttons */}
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {/* link to the dashboard */}
+              <Link
+                href="/dashboard"
+                className="rounded-md bg-[#6ebf10] px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:bg-[#5aa50c] focus:outline-none focus:ring-2 focus:ring-[#6ebf10]/20"
+              >
+                Open Dashboard
+              </Link>
+              {/* link to the login page */}
+                <Link
+                href="/login"
+                className="rounded-md border border-[#bebebe] bg-white px-5 py-2.5 text-sm font-semibold text-[#1c1c1c] shadow-sm transition hover:bg-slate-50"
+              >
+                Log In
+              </Link>
+              {/* link to the onboarding page */}
+              <Link
+                href="/onboarding"
+                className="rounded-md border border-[#bebebe] bg-white px-5 py-2.5 text-sm font-semibold text-[#1c1c1c] shadow-sm transition hover:bg-slate-50"
+              >
+                Create Account
+              </Link>
+            </div>
+          </div>
+
+          {/* container for the features */}
+          <div className="grid gap-4 pb-16 sm:grid-cols-3">
+            {/* feature 1 */}
+            <div className="rounded-xl border border-[#bebebe] bg-white p-5 text-left shadow">
+              <h3 className="mb-1 text-base font-semibold text-[#1c1c1c]">Search Institutions</h3>
+              <p className="text-sm text-[#4a4a4a]">
+                Find colleges and universities that align to your CLEP exams.
+              </p>
+            </div>
+            {/* feature 2 */}
+            <div className="rounded-xl border border-[#bebebe] bg-white p-5 text-left shadow">
+              <h3 className="mb-1 text-base font-semibold text-[#1c1c1c]">Understand Credit</h3>
+              <p className="text-sm text-[#4a4a4a]">
+                See how many credits and which requirements your exams might satisfy.
+              </p>
+            </div>
+            {/* feature 3 */}
+            <div className="rounded-xl border border-[#bebebe] bg-white p-5 text-left shadow">
+              <h3 className="mb-1 text-base font-semibold text-[#1c1c1c]">Personalize Later</h3>
+              <p className="text-sm text-[#4a4a4a]">
+                Use the tool without an account, then create a profile to save progress.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* footer for the home page */}
+      <footer className="border-t border-[#bebebe] bg-white/70">
+        <div className="mx-auto max-w-6xl px-4 py-4 text-center">
+          <p className="text-sm text-slate-500">Powered by Modern States</p>
         </div>
-      </main>
-    </div>
+      </footer>
+    </main>
   );
 }
