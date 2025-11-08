@@ -1,17 +1,11 @@
 from flask import Flask
-from config import Config
-from extensions import init_extensions
-from blueprints.users import user_bp
+from flask_cors import CORS
+from routes.users import users_bp
 
-def create_app(config_object=Config):
-    app = Flask(__name__)
-    app.config.from_object(config_object)
+app = Flask(__name__)
+CORS(app, resources={r"/learners/*": {"origins": "*"}})
 
-    init_extensions(app)
-
-    app.register_blueprint(user_bp, url_prefix="/learners")
-
-    return app
+app.register_blueprint(users_bp)
 
 if __name__ == "__main__":
-    create_app().run(debug=True)
+    app.run(port=5000, debug=True)
