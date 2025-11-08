@@ -1,14 +1,17 @@
+// Key stat data structure
 type KeyStat = {
   label: string;
   value: string;
   helper: string;
 };
 
+// Props for key stats card component
 type KeyStatsCardProps = {
   heading?: string;
   stats: KeyStat[];
 };
 
+// Component that displays key statistics in a card format
 export function KeyStatsCard({
   heading = "Key Stats",
   stats,
@@ -16,6 +19,7 @@ export function KeyStatsCard({
   return (
     <section className="rounded-3xl border border-[#d5e3cf] bg-white p-5 shadow-lg shadow-black/5">
       <h2 className="text-lg font-semibold text-[#1c1c1c]">{heading}</h2>
+      {/* Grid of stat cards */}
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {stats.map((stat) => (
           <article

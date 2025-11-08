@@ -2,17 +2,21 @@
 
 import { useState } from "react";
 
+// Learner data structure
 type Learner = {
   location: string;
   exams: Array<{ code: string; label: string; score: number }>;
 };
 
+// Props for the filters panel component
 type FiltersPanelProps = {
   learner: Learner;
   majors: string[];
 };
 
+// Filter panel component for tailoring institution matches
 export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
+  // State for zip radius filter (in miles)
   const [radius, setRadius] = useState(50);
 
   return (
@@ -25,6 +29,7 @@ export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
       </h2>
 
       <form className="mt-4 space-y-4 text-sm text-[#1c1c1c]">
+        {/* Zip radius slider filter */}
         <div className="space-y-1">
           <label className="text-xs font-semibold uppercase tracking-wide text-[#6ebf10]">
             Zip radius
@@ -43,17 +48,7 @@ export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
           <p className="text-xs text-[#4a4a4a]">Based on {learner.location}</p>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wide text-[#6ebf10]">
-            Major focus
-          </label>
-          <select className="w-full rounded-lg border border-[#bebebe] bg-white p-2">
-            {majors.map((major) => (
-              <option key={major}>{major}</option>
-            ))}
-          </select>
-        </div>
-
+        {/* CLEP exams checkboxes */}
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-wide text-[#6ebf10]">
             CLEP exams
@@ -74,6 +69,7 @@ export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
           </div>
         </div>
 
+        {/* Minimum credits input */}
         <div className="space-y-1">
           <label className="text-xs font-semibold uppercase tracking-wide text-[#6ebf10]">
             Minimum credits
@@ -86,6 +82,7 @@ export function FiltersPanel({ learner, majors }: FiltersPanelProps) {
           />
         </div>
 
+        {/* Update button to apply filters */}
         <button
           type="button"
           className="w-full rounded-lg bg-[#6ebf10] py-2 font-semibold text-white transition hover:bg-[#5aa50c]"
