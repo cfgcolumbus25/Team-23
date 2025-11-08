@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from supabase_client import supabase
@@ -6,6 +9,9 @@ import os
 
 app = Flask(__name__)
 CORS(app)
+
+from routes.send_verification import bp as send_verification_bp
+app.register_blueprint(send_verification_bp)
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
