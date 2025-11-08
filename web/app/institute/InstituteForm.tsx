@@ -134,81 +134,87 @@ export function InstituteForm({ instituteId }: { instituteId: string }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-6 p-6 bg-white rounded-xl shadow-md w-full max-w-4xl"
+      className="flex flex-col gap-8 w-full"
     >
-      {/* Institution Info Section */}
-      <div className="border-b pb-6">
-        <h2 className="text-lg font-semibold mb-4">Institution Policies</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Max Credits (per two semesters)
-            </label>
-            <input
-              type="number"
-              name="max_credits"
-              value={formData.institution_info.max_credits}
-              onChange={handleInfoChange}
-              className="w-full border border-gray-300 rounded-lg p-2"
-              required
-              min="0"
-              max="120"
-            />
+      {/* Institution Policies Card */}
+      <div className="bg-white rounded-xl shadow-sm p-8">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Institution Policies</h2>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Max Credits (per two semesters)
+              </label>
+              <input
+                type="number"
+                name="max_credits"
+                value={formData.institution_info.max_credits}
+                onChange={handleInfoChange}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:border-[#66b10e] transition-all"
+                required
+                min="0"
+                max="120"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Score Validity (in years)
+              </label>
+              <input
+                type="number"
+                name="Score Validity"
+                value={formData.institution_info['Score Validity']}
+                onChange={handleInfoChange}
+                className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:border-[#66b10e] transition-all"
+                required
+                min="0"
+                max="10"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Score Validity (in years)
+          <div className="space-y-4 pt-2">
+            <label className="flex items-center gap-3 text-sm font-medium text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                name="Can Use For Failed Courses"
+                checked={formData.institution_info['Can Use For Failed Courses'] === 1}
+                onChange={handleInfoChange}
+                className="w-4 h-4 text-[#66b10e] border-gray-300 rounded"
+              />
+              <span>Allow failed courses to transfer</span>
             </label>
-            <input
-              type="number"
-              name="Score Validity"
-              value={formData.institution_info['Score Validity']}
-              onChange={handleInfoChange}
-              className="w-full border border-gray-300 rounded-lg p-2"
-              required
-              min="0"
-              max="10"
-            />
+
+            <label className="flex items-center gap-3 text-sm font-medium text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                name="Can Enrolled Students Use CLEP"
+                checked={formData.institution_info['Can Enrolled Students Use CLEP'] === 1}
+                onChange={handleInfoChange}
+                className="w-4 h-4 text-[#66b10e] border-gray-300 rounded"
+              />
+              <span>Enrolled students can use CLEP</span>
+            </label>
           </div>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="Can Use For Failed Courses"
-              checked={formData.institution_info['Can Use For Failed Courses'] === 1}
-              onChange={handleInfoChange}
-            />
-            Allow failed courses to transfer
-          </label>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              name="Can Enrolled Students Use CLEP"
-              checked={formData.institution_info['Can Enrolled Students Use CLEP'] === 1}
-              onChange={handleInfoChange}
-            />
-            Enrolled students can use CLEP
-          </label>
         </div>
       </div>
 
-      {/* CLEP Acceptance Section */}
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">CLEP Test Acceptance</h2>
+      {/* CLEP Test Acceptance Card */}
+      <div className="bg-white rounded-xl shadow-sm p-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-gray-900">CLEP Test Acceptance</h2>
           <button
             type="button"
             onClick={addCLEPAcceptance}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+            className="bg-[#66b10e] hover:bg-[#5a9e0d] text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
           >
             + Add CLEP Test
           </button>
         </div>
 
         {formData.clep_acceptance.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">
+          <p className="text-gray-500 text-center py-8">
             No CLEP tests configured. Click "Add CLEP Test" to get started.
           </p>
         ) : (
@@ -227,18 +233,20 @@ export function InstituteForm({ instituteId }: { instituteId: string }) {
       </div>
 
       {/* Metadata Section */}
-      <div className="border-t pt-4 text-sm text-gray-500">
-        {formData.last_updated && (
-          <p>Last updated: {new Date(formData.last_updated).toLocaleString()}</p>
-        )}
-        {formData.updated_by && <p>Updated by: {formData.updated_by}</p>}
-      </div>
+      {(formData.last_updated || formData.updated_by) && (
+        <div className="text-sm text-gray-500 space-y-1">
+          {formData.last_updated && (
+            <p>Last updated: {new Date(formData.last_updated).toLocaleString()}</p>
+          )}
+          {formData.updated_by && <p>Updated by: {formData.updated_by}</p>}
+        </div>
+      )}
 
-      {/* Submit Button */}
-      <div className="flex justify-end gap-4">
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-4 pt-2">
         <button
           type="button"
-          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-6 py-2.5 text-gray-700 hover:text-gray-900 rounded-lg transition-colors font-medium"
           onClick={() => window.location.reload()}
         >
           Cancel
@@ -246,9 +254,9 @@ export function InstituteForm({ instituteId }: { instituteId: string }) {
         <button
           type="submit"
           disabled={saving}
-          className="bg-[#66b10e] hover:bg-[#5a9e0d] disabled:bg-gray-400 text-white py-2 px-6 rounded-lg transition-colors"
+          className="bg-[#66b10e] hover:bg-[#5a9e0d] disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2.5 px-8 rounded-lg transition-colors font-medium"
         >
-          {saving ? 'Saving...' : 'Save Settings'}
+          {saving ? 'Saving...' : 'Save'}
         </button>
       </div>
     </form>

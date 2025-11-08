@@ -36,43 +36,43 @@ export function CLEPAcceptanceItem({
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-      <div className="flex justify-between items-start mb-3">
-        <h3 className="font-medium text-sm">CLEP Test #{index + 1}</h3>
+    <div className="border border-gray-200 rounded-lg p-6 bg-white">
+      <div className="flex justify-between items-start mb-5">
+        <h3 className="text-sm font-bold text-gray-900">CLEP Test #{index + 1}</h3>
         <button
           type="button"
           onClick={onRemove}
-          className="text-red-500 hover:text-red-700 text-sm font-medium"
+          className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
           aria-label="Remove CLEP test"
         >
           Remove
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Exam Name
           </label>
           <input
             type="text"
             value={examData.exam_name}
             onChange={(e) => handleChange('exam_name', e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:border-[#66b10e] transition-all"
             placeholder="e.g., Biology"
             required
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Cut Score (20-80)
           </label>
           <input
             type="number"
             value={examData.cut_score}
             onChange={(e) => handleChange('cut_score', e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:border-[#66b10e] transition-all"
             min="20"
             max="80"
             required
@@ -80,14 +80,14 @@ export function CLEPAcceptanceItem({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Credits Awarded
           </label>
           <input
             type="number"
             value={examData.credits_awarded}
             onChange={(e) => handleChange('credits_awarded', e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:border-[#66b10e] transition-all"
             min="0"
             max="12"
             required
@@ -95,14 +95,14 @@ export function CLEPAcceptanceItem({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Course Equivalent(s)
           </label>
           <input
             type="text"
             value={examData.course_equivalents}
             onChange={(e) => handleChange('course_equivalents', e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
+            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:border-[#66b10e] transition-all"
             placeholder="BIO 101, BIO 102"
             required
           />
