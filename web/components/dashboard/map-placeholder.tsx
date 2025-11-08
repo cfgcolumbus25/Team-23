@@ -1,11 +1,11 @@
 export function MapPlaceholder() {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5">
-      <h2 className="text-lg font-semibold text-slate-900">Map Overview</h2>
-      <p className="text-sm text-slate-600">
+    <section className="rounded-xl border border-[#bebebe] bg-white p-5">
+      <h2 className="text-lg font-semibold text-[#6ebf10]">Map Overview</h2>
+      <p className="text-sm text-[#4a4a4a]">
         Interactive visualization will appear here.
       </p>
-      <div className="mt-4 h-64 rounded-lg bg-slate-900/10" />
+      <div className="mt-4 h-64 rounded-lg border border-dashed border-[#6ebf10]" />
     </section>
   );
 }

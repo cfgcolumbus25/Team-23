@@ -38,10 +38,27 @@ const mockInstitutions = [
     lastUpdated: "Aug 2023",
   },
 ];
+const mockStats = [
+  {
+    label: "Matches",
+    value: "24",
+    helper: "Institutions aligned to CLEP exams",
+  },
+  {
+    label: "Avg Credits",
+    value: "9",
+    helper: "Median awarded across matches",
+  },
+  {
+    label: "Fresh Policies",
+    value: "72%",
+    helper: "Updated within last 12 months",
+  },
+];
 
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-slate-100 p-6 text-slate-900">
+    <main className="min-h-screen bg-[#bebebe] p-6 text-[#1c1c1c]">
       <div className="flex w-full flex-col gap-6">
         <DashboardHeader
           badge="Modern States - CLEP Acceptance Tools"
@@ -51,7 +68,7 @@ export default function DashboardPage() {
 
         <section className="grid gap-4 md:grid-cols-2">
           <ProfileSummaryCard learner={mockLearner} />
-          <KeyStatsCard description="Key stats - number of matching institutions, average credits awarded" />
+          <KeyStatsCard stats={mockStats} />
         </section>
 
         <section className="grid gap-4 lg:grid-cols-3 lg:items-start">
