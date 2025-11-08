@@ -1,6 +1,6 @@
 "use client";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "http://localhost:5001";
 
 import React from "react";
 import InputField from "@/components/onboarding/InputField";
@@ -191,6 +191,20 @@ export default function OnboardingPage() {
       }
 
       console.log("User created:", json);
+      
+      // Save user data to localStorage for personalization
+      const userData = {
+        name: name.trim(),
+        email: email.trim(),
+        zipcode: zip.trim(),
+        exams: selectedExams.map(exam => ({
+          label: exam,
+          code: exam.replace(/\s+/g, '-').toUpperCase(),
+          score: scoresByExam[exam] ? parseInt(scoresByExam[exam], 10) : 0,
+        })),
+      };
+      localStorage.setItem('userData', JSON.stringify(userData));
+      
       setToastMessage("Profile created successfully!");
       setShowToast(true);
       router.push("/dashboard");
