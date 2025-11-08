@@ -59,7 +59,7 @@ export default function LoginPage() {
       if (userRole === 'platform_admin') {
         router.push('/admin/emails')
       } else {
-        router.push('/manage')
+      router.push('/manage')
       }
     } catch (err) {
       setError('Network error. Please try again.')
